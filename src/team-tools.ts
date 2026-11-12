@@ -27,8 +27,8 @@ import {
   type Role,
 } from './team.ts'
 
-/** Minimal shape of the tool helper we inject, so this file stays testable. */
-type Define = (definition: unknown) => unknown
+/** The host's `defineTool` constructor, passed in from `syncTools`. */
+type Define = (definition: Record<string, unknown>) => unknown
 type Register = (definition: unknown) => () => void
 
 /** Counters that make ids readable in a conversation. */
@@ -45,14 +45,22 @@ function summarise(board: Awaited<ReturnType<typeof readBoard>>): Record<string,
 
 /**
  * Register the team tools.
+ *
+ * `define` is the host's `defineTool` constructor (the same one `syncTools`
+ * passes to `safeDefine`). Every tool definition MUST go through it: on DSH
+ * 0.2.2 the tool registry reads internal layer state from the constructed
+ * definition, so a raw object would fail activation with
+ * "Cannot read properties of undefined (reading 'layers')".
  * @param ctx - plugin context (provides `tools`).
  * @param settings - live settings, for the output directory.
+ * @param define - the host tool constructor.
  * @returns the disposers, one per tool.
  */
-export function registerTeamTools(ctx: Context, settings: MontagexSettings): Array<() => void> {
+export function registerTeamTools(ctx: Context, settings: MontagexSettings, define: Define): Array<() => void> {
   const disposers: Array<() => void> = []
-  const register = ctx.tools.register as unknown as Register
-  const define = (definition: unknown): unknown => definition
+  // Call through the service so `this` stays bound: `tools.register` reads
+  // `this.layers`, and a detached reference would lose the receiver.
+  const register = (definition: unknown): (() => void) => ctx.tools.register(definition)
   const dir = (): string => settings.outputDir
 
   const tool = (definition: {
@@ -65,7 +73,10 @@ export function registerTeamTools(ctx: Context, settings: MontagexSettings): Arr
       register(
         define({
           ...definition,
-          output: { schema: { type: 'object' }, render: (_args: unknown, value: unknown) => [{ type: 'text', text: JSON.stringify(value, null, 2) }] },
+          output: {
+            schema: { type: 'object', properties: {}, additionalProperties: true },
+            render: (_args: unknown, value: unknown) => [{ type: 'text', text: JSON.stringify(value, null, 2) }],
+          },
           timeoutMs: 15_000,
         }),
       ),

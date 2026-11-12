@@ -3581,7 +3581,7 @@ export function syncTools(ctx: Context, settings: MontagexSettings, applyCapabil
   // Team collaboration tools are part of the production surface and share
   // syncTools' lifecycle, so closing a capability never strands a half-registered
   // board.
-  disposers.push(...registerTeamTools(ctx, settings))
+  disposers.push(...registerTeamTools(ctx, settings, define))
 
   return () => {
     for (const dispose of disposers.reverse()) dispose()

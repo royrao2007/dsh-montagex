@@ -1,31 +1,64 @@
 MontageX
 Copyright 2026 royrao2007
 
-This product includes software developed as part of the DirectorX project
-(https://github.com/LaplaceYoung/dsh-directorx), licensed under the
-Apache License, Version 2.0.
+================================================================================
+ACKNOWLEDGEMENTS — with thanks to the DirectorX author
+================================================================================
 
-The following files contain code derived from that project and have been
-modified for MontageX. Per Apache-2.0 section 4(b), the modification is
-declared here and in each file's header comment where practical:
+MontageX would not exist without DirectorX, created by **LaplaceYoung**:
 
-  - src/**            (rebranded, ported to the DSH 0.2.2 plugin API)
-  - knowledge/**      (bundled corpus, unchanged content, rebranded references)
-  - skills/**         (bundled skills, unchanged content, rebranded references)
-  - recipes/**        (unchanged content, rebranded references)
-  - workflows/**      (unchanged content, rebranded references)
+    DirectorX — https://github.com/LaplaceYoung/dsh-directorx
+    Licensed under the Apache License, Version 2.0.
 
-Original copyright and attribution notices are retained in the LICENSE file
-and in this NOTICE file, as required by Apache-2.0 section 4(c).
+Thank you, LaplaceYoung, for building the first DeepSeek Harness-native video
+production harness and for releasing it under a licence that lets others build
+on it. MontageX is a derivative of that work: the production pipeline, the
+knowledge corpus, the skills and the canvas all began as DirectorX, and the
+team-collaboration layer is our addition on top.
 
-Files added by MontageX and not derived from the above project are licensed
-under the MIT License (see LICENSE-MIT). These include:
+================================================================================
+LICENSING
+================================================================================
 
-  - src/team.ts         team collaboration model
-  - src/team-tools.ts   team collaboration tools
-  - tests/team.test.mjs
+This distribution is intentionally mixed, and the two parts are declared
+separately so neither claim overreaches.
 
-The Apache License, Version 2.0 applies to the derived portions of this
-distribution. The MIT License applies to the files listed above. Where the
-two differ, the more permissive MIT terms apply to the files explicitly
-listed as MIT.
+**Part 1 — derived from DirectorX (Apache License, Version 2.0)**
+
+    src/**            rebranded, ported to the DSH 0.2.x plugin API
+    knowledge/**      bundled corpus, content unchanged, references rebranded
+    skills/**         bundled skills, content unchanged, references rebranded
+    recipes/**        content unchanged, references rebranded
+    workflows/**      content unchanged, references rebranded
+
+Full licence text: LICENSE
+Apache-2.0 §4(b) requires modified files to carry a notice that they were
+changed; this file is that notice. §4(c) requires retaining the original
+copyright and attribution notices; the acknowledgement above is that notice.
+
+**Part 2 — original to MontageX (MIT License)**
+
+    src/team.ts         team collaboration model
+    src/team-tools.ts   team collaboration tools
+    tests/team.test.mjs
+
+Full licence text: LICENSE-MIT
+
+Where the two licences differ, the MIT terms apply to the files explicitly
+listed as Part 2. Everything else is governed by Apache-2.0.
+
+================================================================================
+THIRD-PARTY RUNTIME SOFTWARE
+================================================================================
+
+Bundled and redistributed under their own licences:
+
+    @xyflow/react        MIT       canvas
+    @webav/av-cliper     MIT       WebCodecs editing/export
+    three                MIT       3D director stage
+    tui-image-editor     MIT       image editor
+    wavesurfer.js        BSD-3      audio waveforms
+    cmdk                 MIT       command palette
+    nanoid               MIT       id generation
+    onnxruntime-web      MIT       in-browser transcription runtime
+    transformers.js      Apache-2.0 in-browser transcription

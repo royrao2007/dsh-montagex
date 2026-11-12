@@ -19,14 +19,20 @@ async function walk(dir) {
   return out
 }
 
-test('no external upstream URLs are shipped', async () => {
+test('no unrelated external repository URLs are shipped', async () => {
   const files = await walk(root)
   const offenders = []
+  // Attribution and licence compliance require naming the upstream project and
+  // its author (Apache-2.0 §4(c), and plain decency). Those exact references are
+  // allowed; any OTHER repository link would be an unrelated leak.
+  const ALLOWED = [
+    /github\.com\/LaplaceYoung\/dsh-(montagex|directorx)/gi,
+    /github\.com\/LaplaceYoung\b/gi,
+  ]
   for (const file of files) {
     const content = await readFile(file, 'utf8')
-    // The plugin's OWN repository links are fine (README badges / package
-    // metadata); any other GitHub reference is an upstream leak.
-    const stripped = content.replace(/github\.com\/LaplaceYoung\/dsh-montagex/gi, '')
+    let stripped = content
+    for (const pattern of ALLOWED) stripped = stripped.replace(pattern, '')
     if (/github\.com|api\.github\.com/i.test(stripped)) offenders.push(file)
   }
   assert.deepEqual(offenders, [])
@@ -45,10 +51,18 @@ test('original playbook is integrated as a DSH skill', async () => {
   }
 })
 
-test('README presents the content as original plugin features', async () => {
+test('README presents the plugin and credits the upstream author', async () => {
   const readme = await readFile(join(root, 'README.md'), 'utf8')
   assert.match(readme, /dsh-plugin/)
-  assert.doesNotMatch(readme.replace(/github\.com\/LaplaceYoung\/dsh-montagex/gi, ''), /github\.com|api\.github\.com/i)
+  // The README must credit DirectorX's author: attribution is both an
+  // Apache-2.0 obligation and the honest description of where this began.
+  assert.match(readme, /LaplaceYoung/)
+  assert.match(readme, /dsh-directorx/)
+  // Outside that credited project, no unrelated repository links.
+  const stripped = readme
+    .replace(/github\.com\/LaplaceYoung\/dsh-(montagex|directorx)/gi, '')
+    .replace(/github\.com\/LaplaceYoung\b/gi, '')
+  assert.doesNotMatch(stripped, /github\.com|api\.github\.com/i)
 })
 
 test('shipped prose does not name other canvas products', async () => {
