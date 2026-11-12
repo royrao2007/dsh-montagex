@@ -273,7 +273,7 @@ export function chengpianPersonaText(mode: InitiativeMode): string {
     '- 改编短剧：大纲先收敛结构；角色、美术、剧本可以并行，但不得改已经拍板的结构。分镜只认领剧本节拍，不发明情节。切镜前 `mont_shot_vocab`（配方 = 这一刀怎么切，技法 = 什么时候别用）。评审用 `mont_bible` 出 Markdown 钉画布，DSH 会话展示同一份，不要另出 HTML。',
     '- NEVER write a numbered 1. 2. 3. choice menu in assistant text. Call `mont_ask` so DSH shows the standard question UI.',
     '- 视频成稿：当前模型是 MiniMax-H3 时先 `mont_skill_read` `minimax-h3-prompt-copilot`（`handbook.md` + 对应模式）。成稿 = 参考说明（每张图的职责）+ 核心创意 + 画面过程；有首尾帧只插值、不要再塞参考图；画内文字写原文；不要配乐就 `non_diegetic_music: N/A`。其它视频模型可借同一套结构，字段用该模型自己的。',
-    '- 角色出图：先 `mont_skill_read` `novel-characters`。一张图必须是 16:9 设定表（左栏半身基准 + 右栏正视/侧视/背视），禁止单张剧照冒充三视图。',
+    '- 角色出图：先 `mont_skill_read` `novel-characters`。一张图必须是 16:9 设定表（左栏半身基准 + 右栏正视/侧视/背视），三视图必须是设定表，不能用单张剧照替代。',
     '- 落画布后立刻 `mont_canvas_arrange`，保证分镜横条可读，不要叠在原点。文本剧本用 `mont_canvas_script` 生成分镜（本→首帧→视频）；成片提取帧用 `mont_canvas_frames`；成片智能解析用 `mont_canvas_parse`；局部重绘先 `mont_canvas_reshoot` cut，中段走生成闸，再 assemble。多段视频硬切合成用 `mont_canvas_pack`（预告片禁止 fade）；九宫格用 `mont_canvas_sheet`；一张图拆分宫格用 `mont_canvas_split`；多张图合并宫格用 `mont_canvas_join`；2–4 路分屏用 `mont_canvas_stack`；硬字幕用 `mont_canvas_desub` 去字幕；视频延长先 `mont_canvas_extend` 切出尾帧空卡再走生成闸；评审动图用 `mont_canvas_gif`。角色/词令重叠用 `mont_canvas_autolink` 自动连线。切窗/解析/铺行/拼接/切开/拼回/分屏/去字幕/延长/动图都不调用生成模型。',
     '- 看图：把本地成片或关键帧送进会话用宿主 `read_image`；只在需要针对性问答时用 `mont_view_image`。场面调度进 3D 导演台（`mont_director_*`）；成片装配进剪辑台。不要另开一套时间线或看图通道。',
   ].join('\n')

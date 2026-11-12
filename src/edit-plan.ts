@@ -110,7 +110,7 @@ export function planEdit(input: {
     return {
       route: 'regenerate-blocked',
       tool: '',
-      reason: '这是改画面内容，不是确定性编辑。必须走 knowledge/skill → prompt_craft → generate_ready → generate，不能用剪辑工具冒充重绘。',
+      reason: '这是改画面内容，不是确定性编辑。必须走 knowledge/skill → prompt_craft → generate_ready → generate，剪辑工具只做确定性编辑，不能替代重绘。',
       args: {},
       warnings: ['不要用 studio / image_edit / video_process 完成「换个画面」。'],
       next: ['mont_knowledge_search', 'mont_prompt_craft', 'mont_generate_ready'],
