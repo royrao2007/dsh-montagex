@@ -1,0 +1,8 @@
+node_modules/
+*.tgz
+*.log
+.DS_Store
+mont_output/
+montagex_output/
+.loop-record/
+lib/index.js.orig

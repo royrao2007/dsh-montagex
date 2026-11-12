@@ -1,0 +1,31 @@
+MontageX
+Copyright 2026 royrao2007
+
+This product includes software developed as part of the DirectorX project
+(https://github.com/LaplaceYoung/dsh-directorx), licensed under the
+Apache License, Version 2.0.
+
+The following files contain code derived from that project and have been
+modified for MontageX. Per Apache-2.0 section 4(b), the modification is
+declared here and in each file's header comment where practical:
+
+  - src/**            (rebranded, ported to the DSH 0.2.2 plugin API)
+  - knowledge/**      (bundled corpus, unchanged content, rebranded references)
+  - skills/**         (bundled skills, unchanged content, rebranded references)
+  - recipes/**        (unchanged content, rebranded references)
+  - workflows/**      (unchanged content, rebranded references)
+
+Original copyright and attribution notices are retained in the LICENSE file
+and in this NOTICE file, as required by Apache-2.0 section 4(c).
+
+Files added by MontageX and not derived from the above project are licensed
+under the MIT License (see LICENSE-MIT). These include:
+
+  - src/team.ts         team collaboration model
+  - src/team-tools.ts   team collaboration tools
+  - tests/team.test.mjs
+
+The Apache License, Version 2.0 applies to the derived portions of this
+distribution. The MIT License applies to the files listed above. Where the
+two differ, the more permissive MIT terms apply to the files explicitly
+listed as MIT.

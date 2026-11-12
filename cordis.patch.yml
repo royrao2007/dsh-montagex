@@ -1,0 +1,7 @@
+# dsh-montagex bundle patch.
+# One row carries both halves: the Node half registers MontageX tools and
+# skills, and package.json#dsh.client makes the same package register the
+# MontageX WebUI settings section.
+- insert:
+    - id: montagex
+      name: dsh-montagex

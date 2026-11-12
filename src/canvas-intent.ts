@@ -1,0 +1,211 @@
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
+import { resolveOutputDir } from './support.ts'
+import { buildIpBrief, type IpMemoryHint } from './ip-lexicon.ts'
+import { IpMemoryStore } from './ip-memory.ts'
+import { planPrompt } from './prompt-plan.ts'
+
+/**
+ * DSH-owned canvas directives. The WebUI never mutates the storyboard for
+ * generation; it enqueues an intent. DSH reads it, writes the canvas through
+ * mont_canvas_* / mont_canvas_continue, then acks.
+ */
+
+export type CanvasIntentKind = 'image' | 'video'
+
+export interface CanvasIntent {
+  id: string
+  kind: CanvasIntentKind
+  prompt: string
+  sourceId?: string
+  selectedIds: string[]
+  characters: string[]
+  model?: string
+  aspect?: string
+  count?: number
+  durationSec?: number
+  refIds?: string[]
+  status: 'pending' | 'taken' | 'done' | 'cancelled'
+  at: number
+  takenAt?: number
+}
+
+interface IntentLedger { intents: CanvasIntent[] }
+
+const FILE = 'canvas-intents.json'
+const MAX = 100
+
+export function formatDshCanvasPrompt(intent: CanvasIntent, extras: { sourceLabel?: string; memory?: IpMemoryHint[] } = {}): string {
+  const source = intent.sourceId !== undefined
+    ? `${intent.sourceId}${extras.sourceLabel !== undefined && extras.sourceLabel !== '' ? `（${extras.sourceLabel}）` : ''}`
+    : '（无，从空白开新节点）'
+  const ip = buildIpBrief(intent.prompt, { memory: extras.memory })
+  const plan = planPrompt({ intent: intent.prompt, kind: intent.kind, model: intent.model })
+  const memoryLine = (extras.memory ?? []).length > 0
+    ? `- 项目记忆：${extras.memory!.map(entry => `「${entry.terms[0] ?? ''}」曾写成「${entry.rewrite.slice(0, 80)}」`).join('；')}`
+    : ''
+  return [
+    '[MontageX 画布指令]',
+    '下面「意图」只是用户原句，不是生成提示词。禁止拿它直接 generate。',
+    '用 mont_canvas_intents { claim: true } 领取本条。固定顺序：claim → mont_skill_route → mont_prompt_plan（六要素/物理链/模型技能，不要拿原句当稿）→ mont_skill_read（列出的技能正文）→ mont_knowledge_read（route.articles 的 id，不要另起检索词；必要时外部调研）→ 若版权检出则 mont_ip_scan + knowledge_read 213 + 按方法写细改写 + mont_ip_rewrite → mont_prompt_craft（intent=原句，prompt=成稿）→ mont_generate_ready（设定图/场景/关键帧/首尾帧/图生，缺参考先补）→ 严格/协同 mont_propose+confirm → 带 craftId 和 readyId 再 mont_canvas_continue / generate。不要让画布 UI 自己写 generating 节点。回写画布只改 path / shotStatus；不要用文件名覆盖镜头标题。',
+    `- 意图 id: ${intent.id}`,
+    `- 类型: ${intent.kind}`,
+    `- 意图（未成稿）: ${intent.prompt}`,
+    ip.dirty
+      ? `- 版权：意图含「${ip.hits.map(hit => hit.term).join('、')}」。禁止套固定成稿。先 mont_ip_scan（带回项目记忆），读知识 213，按 method/axes 结合 keep（${ip.keep.join(' / ') || '补动作场景光线'}）自己写细，再 mont_ip_rewrite 验收并记入记忆。负向：${ip.negativeLine}`
+      : '',
+    memoryLine,
+    `- 源节点: ${source}`,
+    intent.selectedIds.length > 0 ? `- 当前选中: ${intent.selectedIds.join(', ')}` : '',
+    intent.model !== undefined && intent.model !== '' ? `- 模型: ${intent.model}` : '',
+    intent.aspect !== undefined && intent.aspect !== '' ? `- 画幅: ${intent.aspect}` : '',
+    intent.count !== undefined && intent.count > 1 ? `- 次数: ${intent.count}` : '',
+    intent.durationSec !== undefined ? `- 时长: ${intent.durationSec}s` : '',
+    intent.refIds !== undefined && intent.refIds.length > 0 ? `- 参考节点: ${intent.refIds.join(', ')}` : '',
+    intent.characters.length > 0
+      ? `- 角色锚点: ${intent.characters.join(', ')}。生成工具必须传 characters 参数（mont_character_list 已注册）。`
+      : '',
+    ip.dirty ? ip.agentPrompt : '',
+    plan.agentPrompt,
+    /片段重做|局部重绘|重做中段/.test(intent.prompt)
+      ? '- 这是局部重绘：生成只覆盖中段，回写该视频节点 path 后调用 mont_canvas_reshoot { action: "assemble", nodeId: 中段id } 把头+中+尾拼接。'
+      : '',
+    /拼成片|合成视频|硬切组装|预告片/.test(intent.prompt)
+      ? '- 这是成片组装：调用 mont_canvas_pack，transition=cut。预告片禁止 fade。'
+      : '',
+    /镜改|再生动|改这一镜|只改这|重新生成/.test(intent.prompt)
+      ? '- 这是单镜修改：先 mont_revise { nodeId: 源节点 }，成稿只改这一处。回写该节点 path。整板其它镜不要重做。系列包已激活就沿用，不要让用户再报人设。'
+      : '',
+    /场面锁|场面控制|作战板|完全控制|多人连续|单镜长拍/.test(intent.prompt)
+      ? '- 这是场面控制：先 mont_blocking harvest/schema。用户只给角色图、开场和事件顺序。你写台账和物件状态机，pin 后再 craft。不要直接 generate。'
+      : '',
+    /宫格拼回|合并宫格|分屏对照|分屏|去硬字|去字幕|续写位|视频延长|导出动图|导出\s*GIF/.test(intent.prompt)
+      ? '- 这是画布工具：合并宫格 mont_canvas_join，分屏 mont_canvas_stack，去字幕 mont_canvas_desub，视频延长 mont_canvas_extend（不生成），导出 GIF mont_canvas_gif。都不要走 generate。'
+      : '',
+    '做完后调用 mont_canvas_intent_ack。',
+  ].filter(Boolean).join('\n')
+}
+
+export async function formatDshCanvasPromptForProject(
+  intent: CanvasIntent,
+  extras: { sourceLabel?: string; outputDir: string },
+): Promise<string> {
+  const store = new IpMemoryStore(extras.outputDir)
+  const memory = store.asHints(await store.recall(intent.prompt))
+  return formatDshCanvasPrompt(intent, { sourceLabel: extras.sourceLabel, memory })
+}
+
+export class CanvasIntentStore {
+  constructor(private readonly outputDir: string) {}
+
+  private filePath(): string {
+    return join(resolveOutputDir(this.outputDir), FILE)
+  }
+
+  async read(): Promise<IntentLedger> {
+    try {
+      const parsed = JSON.parse(await readFile(this.filePath(), 'utf8')) as Partial<IntentLedger>
+      return {
+        intents: Array.isArray(parsed.intents)
+          ? parsed.intents.map(item => ({
+              ...item,
+              characters: Array.isArray(item.characters) ? item.characters : [],
+              selectedIds: Array.isArray(item.selectedIds) ? item.selectedIds : [],
+            }))
+          : [],
+      }
+    } catch {
+      return { intents: [] }
+    }
+  }
+
+  private async write(ledger: IntentLedger): Promise<IntentLedger> {
+    await mkdir(resolveOutputDir(this.outputDir), { recursive: true })
+    await writeFile(this.filePath(), JSON.stringify(ledger, null, 2), 'utf8')
+    return ledger
+  }
+
+  async enqueue(input: {
+    kind: CanvasIntentKind
+    prompt: string
+    sourceId?: string
+    selectedIds?: string[]
+    characters?: string[]
+    model?: string
+    aspect?: string
+    count?: number
+    durationSec?: number
+    refIds?: string[]
+  }): Promise<CanvasIntent> {
+    const prompt = input.prompt.trim()
+    if (prompt === '') throw new Error('prompt 不能为空')
+    if (input.kind !== 'image' && input.kind !== 'video') throw new Error('kind 必须是 image/video')
+    const ledger = await this.read()
+    const count = typeof input.count === 'number' && Number.isFinite(input.count) ? Math.max(1, Math.min(4, Math.floor(input.count))) : undefined
+    const durationSec = typeof input.durationSec === 'number' && Number.isFinite(input.durationSec) ? Math.max(1, Math.min(15, Math.floor(input.durationSec))) : undefined
+    const intent: CanvasIntent = {
+      id: `intent-${Date.now().toString(36)}`,
+      kind: input.kind,
+      prompt: prompt.slice(0, 2000),
+      ...(typeof input.sourceId === 'string' && input.sourceId !== '' ? { sourceId: input.sourceId.slice(0, 100) } : {}),
+      selectedIds: (input.selectedIds ?? []).filter((id): id is string => typeof id === 'string' && id !== '').slice(0, 20),
+      characters: (input.characters ?? []).filter((name): name is string => typeof name === 'string' && name.trim() !== '').map(name => name.trim().slice(0, 80)).slice(0, 8),
+      ...(typeof input.model === 'string' && input.model !== '' ? { model: input.model.slice(0, 80) } : {}),
+      ...(typeof input.aspect === 'string' && input.aspect !== '' ? { aspect: input.aspect.slice(0, 16) } : {}),
+      ...(count !== undefined ? { count } : {}),
+      ...(durationSec !== undefined ? { durationSec } : {}),
+      ...(Array.isArray(input.refIds) ? { refIds: input.refIds.filter((id): id is string => typeof id === 'string' && id !== '').slice(0, 8) } : {}),
+      status: 'pending',
+      at: Date.now(),
+    }
+    ledger.intents.push(intent)
+    if (ledger.intents.length > MAX) ledger.intents.splice(0, ledger.intents.length - MAX)
+    await this.write(ledger)
+    return intent
+  }
+
+  async list(status?: CanvasIntent['status']): Promise<CanvasIntent[]> {
+    const ledger = await this.read()
+    const filtered = status === undefined ? ledger.intents : ledger.intents.filter(item => item.status === status)
+    return filtered.slice().reverse()
+  }
+
+  /**
+   * Claim the oldest pending intent. Two DSH turns cannot take the same
+   * directive: the first call marks it taken, the next call gets the next one.
+   */
+  async takeNext(): Promise<CanvasIntent | null> {
+    const ledger = await this.read()
+    const pending = ledger.intents
+      .filter(item => item.status === 'pending')
+      .slice()
+      .sort((a, b) => a.at - b.at)
+    const intent = pending[0]
+    if (intent === undefined) return null
+    intent.status = 'taken'
+    intent.takenAt = Date.now()
+    await this.write(ledger)
+    return intent
+  }
+
+  async ack(id: string, status: 'taken' | 'done' | 'cancelled'): Promise<CanvasIntent> {
+    const ledger = await this.read()
+    const intent = ledger.intents.find(item => item.id === id)
+    if (intent === undefined) throw new Error(`canvas intent "${id}" not found`)
+    const allowed = TRANSITIONS[intent.status]
+    if (!allowed.includes(status)) {
+      throw new Error(`canvas intent "${id}" cannot move ${intent.status} → ${status}`)
+    }
+    intent.status = status
+    if (status === 'taken') intent.takenAt = Date.now()
+    await this.write(ledger)
+    return intent
+  }
+}
+
+const TRANSITIONS: Record<CanvasIntent['status'], ReadonlyArray<CanvasIntent['status']>> = {
+  pending: ['taken', 'done', 'cancelled'],
+  taken: ['done', 'cancelled'],
+  done: [],
+  cancelled: [],
+}

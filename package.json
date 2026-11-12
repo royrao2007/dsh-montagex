@@ -1,0 +1,127 @@
+{
+    "name":  "dsh-montagex",
+    "version":  "0.2.0",
+    "description":  "MontageX锛氱涓€涓互 DeepSeek Harness 涓哄唴鏍哥殑 Video Agent Harness鈥斺€旈潰鍚戠鍒扮 AI 瑙嗛鐢熶骇鐨勫紑婧?dsh-plugin锛岃鐩栬棰戠敓鎴愩€佸垎闀滅敾甯冦€佹櫤鑳藉壀杈戙€丗Fmpeg 璐ㄦ涓庝氦浠樸€俆he first DeepSeek Harness-native video agent harness for AI video production.",
+    "type":  "module",
+    "main":  "lib/index.js",
+    "types":  "lib/index.d.ts",
+    "exports":  {
+                    ".":  {
+                              "types":  "./lib/index.d.ts",
+                              "default":  "./lib/index.js"
+                          },
+                    "./client":  {
+                                     "types":  "./lib/client.d.ts",
+                                     "default":  "./lib/client.js"
+                                 },
+                    "./cordis.patch.yml":  "./cordis.patch.yml",
+                    "./package.json":  "./package.json"
+                },
+    "files":  [
+                  "lib",
+                  "skills",
+                  "knowledge",
+                  "recipes",
+                  "workflows",
+                  "docs",
+                  "cordis.patch.yml",
+                  "README.md",
+                  "CHANGELOG.md",
+                  "LICENSE",
+                  "LICENSE-MIT",
+                  "NOTICE"
+              ],
+    "scripts":  {
+                    "build":  "node scripts/build.mjs",
+                    "test":  "node --test tests/*.test.mjs",
+                    "typecheck":  "tsc --noEmit",
+                    "pretest":  "npm run typecheck \u0026\u0026 npm run build",
+                    "knowledge:audit":  "node --experimental-strip-types scripts/knowledge-okf.ts audit",
+                    "knowledge:check":  "node --experimental-strip-types scripts/knowledge-okf.ts check",
+                    "knowledge:migrate":  "node --experimental-strip-types scripts/knowledge-okf.ts migrate",
+                    "release":  "node scripts/cut-release.mjs",
+                    "release:notes":  "node scripts/release-notes.mjs"
+                },
+    "keywords":  [
+                     "deepseek-harness",
+                     "deepseek-harness-video-agent",
+                     "ai-video-agent-harness",
+                     "dsh-plugin",
+                     "ai-video",
+                     "ai-video-generator",
+                     "text-to-video",
+                     "image-to-video",
+                     "video-agent",
+                     "video-editing",
+                     "storyboard-canvas",
+                     "montagex",
+                     "ffmpeg",
+                     "ai-director"
+                 ],
+    "dsh":  {
+                "bundle":  {
+                               "patch":  "./cordis.patch.yml"
+                           },
+                "client":  {
+                               "platform":  "web",
+                               "immediately":  true,
+                               "inject":  [
+                                              "@deepseek-ai/dsh-client-connection",
+                                              "@deepseek-ai/dsh-client-ui-settings",
+                                              "@deepseek-ai/dsh-client-ui-settings-plugins",
+                                              "@deepseek-ai/dsh-client-ui-commands",
+                                              "@deepseek-ai/dsh-api-remotes"
+                                          ]
+                           }
+            },
+    "peerDependencies":  {
+                             "@deepseek-ai/cordis":  "^4.1.0",
+                             "@deepseek-ai/dsh-skill":  "*",
+                             "@deepseek-ai/dsh-system-prompt":  "*",
+                             "@deepseek-ai/dsh-tools":  "^0.2.2-rc.1",
+                             "@deepseek-ai/schemastery":  "^3.19.0"
+                         },
+    "peerDependenciesMeta":  {
+                                 "@deepseek-ai/dsh-skill":  {
+                                                                "optional":  true
+                                                            },
+                                 "@deepseek-ai/dsh-system-prompt":  {
+                                                                        "optional":  true
+                                                                    },
+                                 "@deepseek-ai/dsh-tools":  {
+                                                                "optional":  true
+                                                            },
+                                 "@deepseek-ai/cordis":  {
+                                                             "optional":  true
+                                                         },
+                                 "@deepseek-ai/schemastery":  {
+                                                                  "optional":  true
+                                                              }
+                             },
+    "devDependencies":  {
+                            "@deepseek-ai/cordis":  "^4.1.0",
+                            "@deepseek-ai/dsh-tools":  "^0.2.2-rc.2",
+                            "@deepseek-ai/schemastery":  "^3.19.0",
+                            "@types/node":  "^22.20.1",
+                            "@types/react":  "^18.3.31",
+                            "@types/three":  "^0.185.4",
+                            "esbuild":  "^0.25.0",
+                            "react":  "^18.2.0",
+                            "react-dom":  "^18.3.1",
+                            "typescript":  "^5.6.0"
+                        },
+    "engines":  {
+                    "node":  "\u003e=24.9.0",
+                    "dsh":  "\u003e=0.2.2-rc.1"
+                },
+    "license":  "SEE LICENSE IN NOTICE",
+    "dependencies":  {
+                         "@webav/av-cliper":  "^1.2.8",
+                         "@xyflow/react":  "^12.11.3",
+                         "cmdk":  "^1.1.1",
+                         "nanoid":  "^6.0.1",
+                         "three":  "^0.185.1",
+                         "tui-image-editor":  "^3.15.3",
+                         "wavesurfer.js":  "^7.12.11"
+                     }
+}

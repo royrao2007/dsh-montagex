@@ -1,0 +1,28 @@
+{
+  "name": "plugin",
+  "test": ["npm", "test"],
+  "allow": [
+    "src/",
+    "tests/",
+    "scripts/dev-loop.mjs",
+    "scripts/parallel-loop-lib.mjs",
+    "scripts/parallel-dev-loop.mjs",
+    "scripts/loop-increment.json",
+    "package.json",
+    "package-lock.json",
+    "CHANGELOG.md",
+    "docs/architecture.md",
+    ".gitignore",
+    ".github/",
+    "recipes/",
+    "lib/",
+    "skills/montagex-production-lead/"
+  ],
+  "deny": [
+    "node_modules/",
+    "mont_output/",
+    ".env",
+    "configs/"
+  ],
+  "message": "test(tools): pin the registered tool inventory"
+}

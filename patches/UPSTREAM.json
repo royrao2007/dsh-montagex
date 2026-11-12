@@ -1,0 +1,37 @@
+{
+  "upstream": {
+    "repository": "https://github.com/LaplaceYoung/dsh-montagex",
+    "commit": "d63c425b4d6c40f3db30ccd433d24ed34947c8af",
+    "version": "0.2.0",
+    "license": "Apache-2.0",
+    "note": "HEAD is the dsh-0.2-compat merge; this copy starts from it."
+  },
+  "localPatch": {
+    "created": "2026-11-12",
+    "forHarness": "0.2.2-rc.2",
+    "approach": "source-level migration; no runtime shim",
+    "changedFiles": [
+      "src/config.ts",
+      "src/index.ts",
+      "src/settings-bridge.ts (new)",
+      "src/dsh.d.ts",
+      "src/client/index.ts",
+      "src/client/MontagexSettingsSection.tsx",
+      "tests/canvas.test.mjs",
+      "tests/montagex.test.mjs",
+      "package.json",
+      "docs/architecture.md",
+      "LOCAL-MODIFICATIONS.md"
+    ],
+    "notice": "LOCAL-MODIFICATIONS.md",
+    "removed": [
+      "patches/0.2-compat.mjs — the old lib/ runtime shim; superseded by the source migration"
+    ]
+  },
+  "verification": {
+    "typecheck": "0 errors (schemastery 3.19 and 3.18 type surfaces)",
+    "tests": "357 total, 314 pass, 2 fail (pre-existing Windows CRLF in dev-loop), 41 skipped",
+    "liveActivation": "153 mont_* tools visible in the composed profile's live tool registry",
+    "liveReload": "volatile write + settings/document-updated re-derives only the affected capability"
+  }
+}

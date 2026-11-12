@@ -1,0 +1,57 @@
+import { MONT_RUNTIME_PRESET } from './runtime-preset.ts'
+import type { Context } from '@deepseek-ai/cordis'
+
+/**
+ * Subagent orchestration contribution: installs MontageX media-production
+ * guidance into every continuable child agent's context, so subagents asked
+ * to plan, prompt, generate, or review media share the same orchestration
+ * discipline as the main agent. Installed through the Harness's own
+ * `subagents.registerContinuableSetup` extension point (effect-bound and
+ * revoked per child when the contribution is removed).
+ */
+
+const GUIDANCE = MONT_RUNTIME_PRESET.subagentGuidance
+const SKILL_CONTENT = MONT_RUNTIME_PRESET.subagentSkill
+
+export function registerSubagentSetup(ctx: Context): () => void {
+  const subagents = ctx.get('subagents') as
+    | { registerContinuableSetup?(contribution: (childCtx: Context) => () => void): () => void }
+    | undefined
+  if (subagents === undefined) return () => {}
+  // DSH >= 0.1.5 removed the `registerContinuableSetup` extension point when
+  // continuable subagents were reworked (queue/steer/stop model). Degrade
+  // gracefully — keep the rest of the plugin loadable — instead of throwing
+  // during apply and failing the whole profile boot.
+  if (typeof subagents.registerContinuableSetup !== 'function') return () => {}
+
+  return subagents.registerContinuableSetup((childCtx) => {
+    const systemPrompt = childCtx.get('systemPrompt') as { section(section: { name: string; order?: number; text: string }): () => void } | undefined
+    const skills = childCtx.get('skills') as {
+      register(skill: {
+        name: string
+        description: string
+        content: string
+        source: 'runtime'
+        provider: string
+        invocation: { modelInvocable: boolean; userInvocable: boolean }
+      }): () => void
+    } | undefined
+    const disposers: Array<() => void> = []
+    if (systemPrompt !== undefined) {
+      disposers.push(systemPrompt.section({ name: 'tool:montagex-subagent', order: 118, text: GUIDANCE }))
+    }
+    if (skills !== undefined) {
+      disposers.push(skills.register({
+        name: 'montagex-subagent-orchestration',
+        description: 'Injected MontageX subagent orchestration discipline: load the matching skill and knowledge, preserve continuity anchors and node roles, use deterministic edits, and return evidence-backed handoffs.',
+        content: SKILL_CONTENT,
+        source: 'runtime',
+        provider: 'montagex',
+        invocation: { modelInvocable: true, userInvocable: true },
+      }))
+    }
+    return () => {
+      for (const dispose of disposers.reverse()) dispose()
+    }
+  })
+}
