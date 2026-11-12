@@ -5,4 +5,12 @@ node_modules/
 mont_output/
 montagex_output/
 .loop-record/
-lib/index.js.orig
+
+# Build outputs that duplicate their inputs or are debug-only.
+lib/vendor/
+lib/*.map
+lib/stage/*.map
+lib/stage/chunks/*.map
+lib/edit/**/*.map
+vendor/*.wasm
+
