@@ -64,10 +64,30 @@ mont_team_whoami         role and permission matrix
 
 ## Quick start
 
+**Install from GitHub** (the current online path):
+
 ```bash
-dsh plugin --profile web add dsh-montagex
+dsh plugin --profile web add github:royrao2007/dsh-montagex
 dsh web
 ```
+
+The repository URL works the same way:
+
+```bash
+dsh plugin --profile web add https://github.com/royrao2007/dsh-montagex
+```
+
+**From the Web UI:** open *Plugins → Add plugin* and enter
+`github:royrao2007/dsh-montagex` — the field takes a package name, a git
+shorthand or repository URL, or a local directory. It does **not** take a whole
+terminal command line.
+
+> `dsh-montagex` is not published to npm yet, so the bare name `dsh-montagex`
+> fails with `not a package name the registry accepts`. Use one of the forms
+> above.
+>
+> If GitHub is unreachable from your network, prefix the URL with a mirror, for
+> example `https://gh-proxy.com/https://github.com/royrao2007/dsh-montagex`.
 
 Open **Settings → MontageX** and switch each of the four capabilities:
 Vision / Image / Video / Audio.

@@ -76,10 +76,24 @@ mont_team_whoami         查角色与权限矩阵
 
 ## 快速开始
 
+**从 GitHub 安装**（当前推荐的线上方式）：
+
 ```bash
-dsh plugin --profile web add dsh-montagex
+dsh plugin --profile web add github:royrao2007/dsh-montagex
 dsh web
 ```
+
+也可以直接填仓库地址，效果相同：
+
+```bash
+dsh plugin --profile web add https://github.com/royrao2007/dsh-montagex
+```
+
+**在 WebUI 里装**：打开「插件 → 添加插件」，输入框填 `github:royrao2007/dsh-montagex`（**不是**整行终端命令）。它只接受三种内容：npm 包名、`github:` 简写或仓库地址、本地目录路径。
+
+> `dsh-montagex` 尚未发布到 npm，所以填裸包名 `dsh-montagex` 会报 `not a package name the registry accepts`。用上面两条之一。
+>
+> 若你的网络连不上 GitHub，可以把 `github:` 换成任一镜像前缀，例如 `https://gh-proxy.com/https://github.com/royrao2007/dsh-montagex`。
 
 打开 **Settings → MontageX**，四个能力各自开关：Vision / Image / Video / Audio。
 

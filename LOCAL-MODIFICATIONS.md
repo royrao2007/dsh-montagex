@@ -80,13 +80,24 @@
 | 设置页视觉 | 需要在 Web GUI 里人工确认渲染效果；本次只做到装配与状态机层面的验证 |
 | `montagex-recipes` 技能名缺失 | 上游既有问题，插件自身有降级，未改 |
 
-## 6. 如何自己安装
+## 6. 如何安装
 
-```powershell
-# 先关掉 DSH（否则 profile 目录被占用，pnpm 会 EPERM）
-dsh plugin --profile web add F:\DSHDesktop\chajian\dsh-montagex-git
+从 GitHub 安装（线上方式，任何机器都能用）：
+
+```bash
+dsh plugin --profile web add github:royrao2007/dsh-montagex
 dsh web
 ```
+
+在 WebUI 里装：**插件 → 添加插件**，输入框填 `github:royrao2007/dsh-montagex`
+（该框只接受 npm 包名、`github:` 简写或仓库地址、本地目录三种内容，
+不要填整行终端命令）。
+
+> `dsh-montagex` 尚未发布到 npm，因此只填裸包名 `dsh-montagex` 会报
+> `not a package name the registry accepts`。用上面两种之一。
+>
+> 网络连不上 GitHub 时，可换成镜像前缀，例如
+> `https://gh-proxy.com/https://github.com/royrao2007/dsh-montagex`。
 
 装好后在 **Settings → MontageX** 配四个能力；关闭某个能力后其对应工具会立刻从
 模型工具目录消失，不需要重启。
