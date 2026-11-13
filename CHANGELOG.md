@@ -2,38 +2,6 @@
 
 本文件记录 dsh-montagex 的用户可见变更。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
-## [0.2.0] - 2026-11-12
-
-### Changed
-
-- **改名与独立发布**：项目更名为 **MontageX**，工具前缀统一为 `mont_`，包名 `dsh-montagex`，插件 id 与设置命名空间均为 `montagex`。
-- **适配 DSH 0.2.2-rc.2**：移除已删除的 `ctx.settings.register`，改为导出 `Config` 并由 `apply(ctx, config)` 接收；能力字段标记为活值，设置页保存后无需重启即可生效。
-- **设置页改走 0.2.x 契约**：浏览器侧由已移除的 `settingsScope` 改为 `ctx.configForms`，只注册 `settings.section`。
-
-### Added
-
-- **团队协作**（MIT）：新增 8 个 `mont_team_*` 工具——角色权限、镜头认领、镜头级批注、阶段签核闸。未解决的修改要求会阻塞签核，看板以纯数据落在 `<outputDir>/team/` 下，可随目录共享。
-
-### Fixed
-
-- 关闭某个能力后，其对应工具立即从工具目录消失，不再需要重启。
-- 工具清单冻结快照同步更新至 161 个（153 继承 + 8 团队）。
-
-### Release
-
-- 首发 **GitHub Release v0.2.0**，产物见 Releases 页；画布菜单文案随品牌统一更新。
-
-## [0.2.1] - 2026-11-13
-
-### Fixed
-
-- **设置页与所有 `/montagex/*` 路由终于真的注册了**：插件的 `inject` 少了 `webServer`，于是 `apply()` 在 HTTP 服务就绪前执行，`ctx.get('webServer')` 返回 `undefined`，18 个 `register*Route` 全部静默返回空 disposer。表现为「测试连接」「接入新模型」以及画布请求一律失败，浏览器只看到 `Failed to execute 'json' on 'Response': Unexpected end of JSON input`——因为服务器对未注册路由回 404 且空响应体。
-- **安装文档里两个会误导的表述**：双协议镜像前缀与 ssh 远端地址都不被输入框接受，README 现改用不含主机名的说法，避免用户照抄后撞上 `a URL must point at a git repository or a tarball`。
-- **安装失败的两个常见报错写进 README**：`ERR_PNPM_IGNORED_BUILDS`（`canvas` 构建被拦）与 `ERR_PNPM_EPERM`（DSH 运行时占用目录句柄），各给出一条处置办法，并说明两者都不影响装好后的使用。
-### Release
-
-- 发布 **GitHub Release v0.2.1** 与 npm `dsh-montagex@0.2.1`；画布菜单与设置页文案随本次修复一并校正。
-
 ## [Unreleased]
 
 ### Fixed
@@ -62,241 +30,52 @@
 - **CI**：Ubuntu runner 补装 ffmpeg；音频 mock 假数据小于 1KB 时不再被 `openaiTts` 当成失败。
 - **audioMix**：侧链闪避先 `asplit` 人声，不再把同一条滤镜标签喂给 compress 和 amix（ffmpeg 7 会当成流选择器）。
 
-## [0.2.0] - 2026-08-18
+## [0.2.2] - 2026-11-14
+
+首个真正带上路由修复的发布版本。`0.2.1` 发布时该修复尚未进入构建产物，
+因此 `0.2.1` 的 `inject` 仍缺少 `webServer`，所有 `/montagex/*` 路由都不会注册。
 
 ### Fixed
 
-- **画布菜单**：双击空白只出快速添加节点，右键空白才是完整添加 / 导入；右键节点先选中再出该类型的短菜单，多选走排列菜单；工具超过三项收进子菜单。Esc / 点菜单外 / 滚轮先关菜单，不再被会话浮窗抢走 Esc。
-- **提问走 DSH 标准通道**：分叉、签字、收成技能不再叫「提问卡通道」。`mont_ask` / `confirm` / `skill_capture` 一律 `userInteraction.ask`。
-- **剧本/人物设定上板**：`character_register`、`storyboard`、`bible pin`、`canvas_script` 把剧本和人物设定钉成画布文本节点。
-- **生成不再过松**：成稿门槛改为至少 120 字且景别/运镜/光线/环境/风格写齐 4 项；H3 要 160 字 + 时间线或三段公式。占位展开写成可执行导演稿，不再塞「角度不是成稿」。
-- **generate_ready 不再把硬切/转场误判成首尾帧**；声明 `ref2v` / `t2v` 优先于宽泛 FL 词。
-- **IP 扫描**：`frozen` 不再把英语冻结动作误判成冰雪奇缘。
-- **Modelverse H3**：`1440P` 大小写都映射到 `2K`。
+- **`inject` 补上 `webServer`**：此前 `apply()` 在 HTTP 服务就绪前执行，`ctx.get('webServer')` 返回 `undefined`，18 个 `register*Route` 静默返回空 disposer，路由从未注册；`0.2.2` 起全部注册。
+- **`inject` 补上 `configEditor`**：保存配置需要 profile 的配置编辑器，缺失会让保存在 UI 已显示新值之后失败。
+- **客户端补状态码检查**：`src/client/stage/Stage.tsx` 的项目列表请求此前把 404 吞进空 `catch`，失败不可见；现在先查 `response.ok` 再解析，并把原因写进控制台。
+
+### Release
+
+- 发布 **GitHub Release v0.2.2** 与 npm `dsh-montagex@0.2.2`，两处版本号与产物一致；画布菜单与设置页文案随本次修复一并校正。
+
+## [0.2.1] - 2026-11-13
+
+### Fixed
+
+- **设置页与所有 `/montagex/*` 路由终于真的注册了**：插件的 `inject` 少了 `webServer`，于是 `apply()` 在 HTTP 服务就绪前执行，`ctx.get('webServer')` 返回 `undefined`，18 个 `register*Route` 全部静默返回空 disposer。表现为「测试连接」「接入新模型」以及画布请求一律失败，浏览器只看到 `Failed to execute 'json' on 'Response': Unexpected end of JSON input`——因为服务器对未注册路由回 404 且空响应体。
+- **安装文档里两个会误导的表述**：双协议镜像前缀与 ssh 远端地址都不被输入框接受，README 现改用不含主机名的说法，避免用户照抄后撞上 `a URL must point at a git repository or a tarball`。
+- **安装失败的两个常见报错写进 README**：`ERR_PNPM_IGNORED_BUILDS`（`canvas` 构建被拦）与 `ERR_PNPM_EPERM`（DSH 运行时占用目录句柄），各给出一条处置办法，并说明两者都不影响装好后的使用。
+### Release
+
+- 发布 **GitHub Release v0.2.1** 与 npm `dsh-montagex@0.2.1`；注意该版构建产物尚未包含 `webServer` 注入修复，路由修复见 `0.2.2`。
+
+## [0.2.0] - 2026-11-12
 
 ### Changed
 
-- **菜单文案对齐同类无限画布产品**：生成、添加节点、编辑、复制、锁定、删除、编组 / 取消编组、提取帧、智能解析、局部重绘、合成视频、去字幕、视频延长、导出 GIF、重新生成、自动连线、九宫格。旧叫法仍可口头触发。
-- **发版走 GitHub Releases**：`v*` 标签会跑测试并发布；本地 `npm run release`。
-
-- **知识库 OKF 治理**：语料按 Google Open Knowledge Format v0.2 带 `type` / `tags` / `description` / `sources`。删掉重号占位，合并导航/总合成/N+1 四融合。有效文章 **348**（90 个旧编号重定向）。`knowledge_search` 可按 type/tag/group 过滤，综合篇降权。维护命令 `npm run knowledge:audit` / `knowledge:check`。
-- **画布分镜排版**：镜号与标题叠在卡片底部，空卡显示意图而不是空白图标；多选时收起生成条，避免和多选栏叠在一起。编组给幕标题留出上边距。方向键按 8/16 网格微移，吸附打开时跟网格对齐。Tab / ⇧Tab 按镜号和阅读顺序换镜。
-- **画布卡片**：成图铺满卡片，不再叠齿孔/角标/底栏；文件名 slug 不当标题；双击节点居中缩放到合适位置。DSH 会话里生成结果出小图预览，双击加入画布（已在画布上则聚焦）。
-- **画布 / 编辑台**：E 打开所选媒体编辑；编辑台显示镜头名而非文件名；Esc 先取消裁剪/文字再返回画布；⌘S 保存；图片工具 V/C/B/T/A；视频时间线播放头带当前时间。
-- **适配 DeepSeek Harness 0.1.0-rc.7**：浏览器半侧同时注册 `settings.section` 与 `settings.plugin.item`（`id`/`key`=`montagex`）。现网 plugin.item 是 list 槽，必须带 `options.id`。RC.7 起 Host 服务全部已注册 settings 命名空间。
-- **README**：补入画布截图与成片演示（`docs/assets/`），并按当前画布会话、确认后落板、调色台、90 工具、DSH 0.1.0-rc.7 对齐说明。
-- **ffmpeg 8**：`delogo` 去掉已删除的 `band` 选项；烧录字幕改走 `subtitles` 滤镜（`ass` 不再读 SRT）。
-
-### Removed
-
-- **社区雷达文档**：不再随仓库发布 `docs/community-radar.md`。
+- **改名与独立发布**：项目更名为 **MontageX**，工具前缀统一为 `mont_`，包名 `dsh-montagex`，插件 id 与设置命名空间均为 `montagex`。
+- **适配 DSH 0.2.2-rc.2**：移除已删除的 `ctx.settings.register`，改为导出 `Config` 并由 `apply(ctx, config)` 接收；能力字段标记为活值，设置页保存后无需重启即可生效。
+- **设置页改走 0.2.x 契约**：浏览器侧由已移除的 `settingsScope` 改为 `ctx.configForms`，只注册 `settings.section`。
 
 ### Added
 
-- **MiniMax H3 手册内化**：官方时长 4–15s、推荐 1440p、提示词三段式与首尾帧纪律写入 `h3-contract` / `h3-prompt` 和 `minimax-h3-prompt-copilot`。有首尾帧时不再叠 role:reference。
-- **画布工艺**：文本剧本可拆成「本→首帧→视频」分镜行（`mont_canvas_script`，认 Fountain 场次与中文镜号）；成片视频可抽帧上板（`mont_canvas_frames`，ffmpeg）；成片一键解析（`mont_canvas_parse`，切点检测+分镜稿+代表帧）；片段重做（`mont_canvas_reshoot` cut 切头尾、中段走 DSH 生成闸，再 assemble 拼回）；按角色名和词令重叠自动连参考边（`mont_canvas_autolink`）。画布菜单与 `POST /montagex/canvas/craft` 同源。不写 generating，也不加音频节点。
-- **提示词 / 成片编排**：`mont_prompt_plan` 按镜头给出六要素缺口、视频物理链、模型 copilot 和版权方法，不写死成稿。`brief.compose` 补上路（skill_route）和稿（plan→craft→ready）；阶段账本增加 `craft`。`mont_chengpian` 的二到四个角度只是写法，返回 `flow`/`next` 让 DSH 自己写细。
-- **编排收口**：分诊类型只在 `brief.classifyRequestType` 一处判定；`brief` / 画布指令 / `orchestrate` 共用同一份 `prompt_plan`。成稿缺 refs 时优先走 route，不再重复搜库。IP 扫描与项目记忆短缓存；知识/技能检索共用分词；卡片只订阅本镜连线和同提示词变体，避免整图重绘。
-- **DSH 可编排的确定性编辑**：`mont_edit_plan` 按意图路由；`mont_image_edit` 做旋转/翻转/裁切/缩放；`edit` / `video_process` / `timeline` / `smart_cut` / `concat` 可带 `nodeId` 回写画布并记入 edits 账本。调色仍走 `mont_studio`。不削弱 craft/ready/proposal 生成闸。
-- **技能/工具路由**：`mont_skill_route` 按原话点名该 read 的 skill 与应按序调用的工具；`skill_search` 命中也带 `tools`/`next`。生成前必须 route → skill_read 正文，不能只看目录摘要。
-- **知识库 ↔ 技能对照**：同一套同义词；`skill_route` 带文章 id；`knowledge_search`/`read` 命中带该读的 skill；`skill_search`/`read` 命中带该读的文章。DSH 按 id 精读，不再两边各搜一遍。
-- **2026-08 X 现场管线**：方法论补规则 100-105（分镜事实源、参考隔离、资产护照、未锁不许写提示词、物理因果链、模型各吃各的提示词），制片统筹七步对照现有工具。
-- **版权安全改写（编排 + 记忆）**：工程只检出 IP 并给出论文方法轴（泛化 / 去专名 / 负向排除），不写死替换句。`mont_ip_scan` 带回方法与项目记忆；`mont_ip_rewrite` 验收成稿并按用户用法记入 `ip-memory.json`。画布红波浪线「交给 DSH 改写」。成稿仍含专名则 craft / ready / generate 拒绝。依据知识 213、Nature genericization、arXiv 2406.14526。
-- **生成模型自接入（A+B）**：用户只交模型 id、API 文档、Key。固定工具链 `mont_provider_ingest` → `classify` → `draft` → `smoke` → `commit`。已有协议复用现成适配器；对不上的新 HTTP 走 `generic-rest`（JSON create/poll，禁止生成代码）。设置页「接入新模型」，`generate_*` 可带 `model` 覆盖，路由表合并用户 catalog。README 将自适应接入作为首页能力。
-- **提问卡 / 检索 / 阶段账本**：`mont_ask` 把分叉做成 DSH 提问卡（禁止正文菜单）；知识检索加同义词与分组，并增加 `mont_skill_search` / `mont_skill_read`；`mont_stage` 记录 brief→deliver 的阶段性产物。
-- **生成必须先成稿**：画布短句只是意图。`mont_prompt_craft` 校验已 read 的知识库与 skill（必要时外部调研），`generate_*` / `propose` 必须带 `craftId`。
-- **画布交互（一手 fiber）**：左键拖节点移动、空白框选、中键/右键/空格平移、滚轮平移、捏合+左下角滑条缩放（10%–300%）；画布打开时收起「MontageX 编辑」把手；details 列按剩余宽度改 grid。WebUI 仍不写 generating 节点。
-- **画布 agent 工具面（DSH 增删改查/分组/编排）**：`canvas_add` 可写 prompt/shotIndex/状态/连续性；新增 `canvas_node`（单条读写上下文）、`canvas_groups` / `canvas_group`（收组）、`canvas_disconnect`（按端点删边）、`canvas_sequence`（写镜号+承接）、`canvas_plan`（幕/镜一次落画布，不生成）。MCP 同步。WebUI 仍不得写 generating 节点。
-- **DSH 人机平面（命令 + 原生提问）**：宿主注册 `/montagex`（`ctx.commands`，Web 斜杠菜单 / TUI，零 token）；`mont_confirm` 直接调用 `ctx.userInteraction.ask()` 对下一条 / 提案队列 / 分镜表签字并写回账本。不再只返回 `ask: ask_user_question` hints。客户端给裸 `/montagex` 挂 popupSelect。
-- **成片 persona + 严格/自动/协同**：`montagex:chengpian` 进 DSH system prompt（order 5，人格带）；`mont_chengpian` 决策确认/生成/二到四个提示词/占位。严格先出选项，`chosen:true` 入队选定的一条；批准后 generate 带 `proposalId` 才执行。自动预算内放行。确认走 `mont_confirm`（DSH `userInteraction`）。
-- **画布 UI**：近黑 `#141414` 幽灵层、Inter、卡片内联操作、空态一颗白胶囊「交给 DSH 开拍」。生成条只入队 intent，不写 generating 节点。
-- **README**：按常见高星仓库结构重排（徽章、能力表、流程、对比、FAQ），数字与当前工具/语料对齐。
-- **可组合生产流程**：`mont_brief.compose` 按类型给出配方 + 阶段 + 工具序列（调研 → 澄清 → 占位 → 分镜表签字）。agent 用现有工具自己编排；`mont_orchestrate` 仍是可选加速。
-- **画布分镜表**：`mont_canvas_shotlist` 按 `shotIndex` 导出编号分镜（时长/连续性/状态/时长预算），给用户签字后再花钱。形态来自 Storyboarder / Boords，不生成媒体。
-- **生成条角色锚点**：画布指令带上已注册角色名；`formatDshCanvasPrompt` 要求 DSH 生成时传 `characters`，UI 不再自己写节点。
-- **隔离开发回路**：`scripts/parallel-dev-loop.mjs` 以独立 cwd/`git -C` 推进本仓库；测试红则本树不提交，不碰 sibling agent 树。
-- **画布命令面板换成 cmdk**：两套手写 ⌘K 列表合并为 `CanvasCommandPalette`（pacocoursey/cmdk），分组过滤、方向键与 aria 由库负责。
-- **画布上下文抽屉**：列出 `GET /montagex/canvas/intent` 待领取/处理中指令（再交给 DSH / 取消），并接入角色库 `GET/POST /montagex/characters`（只写 `characters.json`，不改画布）。指令 POST 现在也可 `{id,status}` 取消。
-- **画布生成环（节点 + / 底部生成条）**：选中节点右侧 `+`、悬停「生成」、
-  快捷键 `G`、拖线到空白「生成下游」都会打开底部生成条（图像/视频 + 提示词）。
-  提交后写入 `mont_canvas_intents` 并 `session.prompt` 交给 DSH；
-  DSH 用 `mont_canvas_continue` / `mont_canvas_*` 改画布，UI 不再自己写
-  generating 节点。`continueGenerate` 仍是 DSH 工具的规划器。自定义连线层
-  经 `ViewportPortal` 进入 xyflow 视口，端点按分组绝对坐标计算，平移/缩放后仍贴在节点上。单击媒体卡改为选中
-  （双击才进编辑器）；镜头状态循环 / 分组折叠按钮真正接线；保存不再丢掉
-  `shotStatus` / `selectedTakeId` / `continuityRules` / 边的 `sourceVariantIdx`。
-  标题栏居中（「请输入标题」）；滚轮平移、⌘+滚轮缩放，与帮助文案一致。
-- **扩充调研波（四方向，规则扩至 99 条 + 工具升级）**：
-  - 平台运营 84-91（封面三件套/平台规格/标题公式/发布窗口/留存四时刻/
-    封面质检/CTR SOP）→ brief 平台规格卡 + 标题变体 + 封面提示词；
-  - 配音表演 92-99（规定情境/停顿杠杆/一句一重音/对象感/语速基准/
-    音色四参数卡/一段一指令/中文预处理）→ generate_audio instructions；
-  - VFX 74-83（慢动作纪律/无缝转场原理/VFX 四要素/合成思维/转场参数表）
-    → videoProcess reverse/freezeEnd + timeline 场景级 speed；
-  - 商业与教育 69-73（Distributed AIDA/微课认知负荷）→ brief 钩子变体；
-  - README SEO/GEO 重写（双语关键词 + 双 mermaid 流程图 + FAQ）；
-  - 修复：canvas_search 容错、纯视频片段拼接（cut/fade 双路径）、
-    上游扫描白名单（本仓库链接）。
+- **团队协作**（MIT）：新增 8 个 `mont_team_*` 工具——角色权限、镜头认领、镜头级批注、阶段签核闸。未解决的修改要求会阻塞签核，看板以纯数据落在 `<outputDir>/team/` 下，可随目录共享。
 
-- **视频生成与导演知识调研波（三方向全部沉淀，模型 API/本地部署不涉及）**：
-  - 内置技能 `montagex-methodology` 扩至 **68 条规则**（12 领域）：导演技法
-    36-48（景别序列/运镜动机/场面调度/光影色彩/转场语法）、叙事后期 49-58
-    （三段式/三幕比例/冷热开场/Setup-Payoff/B-roll/字幕时序/响度曲线/声音
-    三支柱）、提示词进阶 59-68（时序三层分离/镜头块模板/风格语法/画幅先定/
-    参考池/种子语义/音画三格式/首帧锁构图），全部附来源与工具落点；
-  - 调研规则产品化：`mont_qa` 新增 ASL 平均镜头时长质检门；
-    `mont_generate_video` 新增 negative_prompt 透传；
-    `mont_style` 新增四个完整风格语法预设（wong-kar-wai /
-    wes-anderson / cyberpunk / noir——锚+色盘+运动语法+负面锁四件套，实测）；
-  - radar 归档三方向调研波（来源 + 规则映射 + 口径声明）。
+### Fixed
 
-- **高优先级四支柱（产品与工程编排向，模型接入降级）**：
-  - 分析视频：`mont_video_analyze`（分镜检测/代表帧/响度）、
-    `mont_qa`（时长/画幅/音轨/镜头数/节奏/黑帧/白帧七门）、
-    `mont_qa_report`（一键质检卡上画布）；
-  - 制作视频：`mont_smart_cut`（LLM 精剪，脚本句↔字幕匹配组装）、
-    `mont_clip_rank`（候选片段排序，ESA 评分步）、
-    `audioMix.targetLufs`（-14/-23 LUFS 平台标准）、ducking 参数对齐
-    行业标准、提案状态机上画布（propose 绑定画布节点）；
-  - 理解意图：`mont_brief`（类型/平台/时长/风格/锚点/素材推断 +
-    一次澄清协议 + nextActions 动作序列）；
-  - 制作方法论：内置技能 `montagex-methodology`（25 条规则：成片结构/
-    提示词工程/剪辑节奏/LLM 精剪/音频混音，全部附来源与工具落点），
-    三模板引用规则编号；
-  - 方法论实演两次：质检镜像（analyze+qa→画布质检节点）、意图分诊
-    （brief→画布简报组 15 节点）。
+- 关闭某个能力后，其对应工具立即从工具目录消失，不再需要重启。
+- 工具清单冻结快照同步更新至 161 个（153 继承 + 8 团队）。
 
-- **联网+开源社区调研驱动的 agentic 能力补齐**：
-  - `montagex/mcp`：JSON-RPC 2.0 MCP 端点（13 工具）——外部 AI 助手（Claude/
-    ChatGPT/Cursor）可驱动 MontageX 制片工作室（对标 Runway MCP）；
-  - `mont_video_understand`：视频理解（抽帧+vision 描述，不可用时确定性降级）；
-  - `mont_character_register/list` + 生成工具 `characters` 参数：角色/主体
-    一致性锚点（对标 Gen-4 世界一致性、可灵 3.0 主体参考）；
-  - `mont_timeline`：OTIO 灵感 timeline.json 渲染中枢（裁剪→拼接→混音→字幕，
-    改计划=重渲染）；
-  - `mont_audio_sync`：音画同出（旁白边界检测+自动混音+字幕+时间锚点）；
-  - `mont_canvas_branch` + 画布「对比」视图：多版本对比选优（Sora 2 remix）；
-  - `mont_subtitle_cut`：按字幕打点切镜头（FunClip 对标，关键词定位）；
-  - 自主推导工作流三次实测（口播 dryRun/拉片/理解联动），画布全程镜像。
+### Release
 
-- **AI 视频制作全链路**（确定性 ffmpeg 工具链，插件自包含）：
-  - `mont_video_process`（裁剪/变速 0.5-8x/缩放/音量/静音/fps）、
-    `mont_video_concat`（硬切或 xfade 交叉淡化拼接）、
-    `mont_audio_mix`（多轨混音 + sidechain 闪避 ducking）、
-    `mont_video_subtitle`（soft 软字幕轨 / burn 烧录按 libass 探测）、
-    `mont_video_zoom`（Ken Burns 推拉/平移）、`mont_video_pip`
-    （画中画/贴纸叠加）、`mont_audio_beat`（ebur128 瞬时响度节拍检测）；
-    全部真实 ffmpeg 往返测试（44+ 用例覆盖）。
-- **agentic 工作流能力**：
-  - 三套 workflow 模板：montagex-pipeline（多镜头叙事）、
-    montagex-talking-video（口播/讲解：脚本→tts→b-roll→混音→srt）、
-    montagex-montage（卡点混剪：素材盘点→beat→裁剪→拼接→混音成片）；
-    全流程画布镜像 + dryRun 零成本质检路径；
-  - `mont_propose/proposals/proposal_update` 占位提案状态机（先方案
-    后生成，approved 才执行）；
-  - `mont_preflight` 生成前四道闸门（规格/内容/成本/权利）确定性审计；
-  - `mont_style` 风格/镜头语言注入（知识库实文 + 10 个预设 slug）。
-- **导演知识工具化**：`mont_style`（见上）+ 内置
-  montagex-production-lead 技能（分诊/控制模式/单元生产/工作流推导）。
-
-- **MontageX persona 与画布/编辑器工作台**（agent runtime 层改造 + WebUI 表面）：
-  - systemPrompt 注入 MontageX（DX）制片统筹 persona：分诊（简单直接生成/
-    复杂走 production-lead）、成本护栏、unit 粒度汇报、默认中文；子代理
-    继承同一纪律；
-  - 画布 = 分镜板制度：节点=镜头/素材、连线=承接、分组=幕；workflow
-    编排模板的每个阶段镜像画布（dryRun 实测：分镜导演子代理真实写入分组+
-    镜头节点+顺序连线）；
-  - 内置技能 montagex-production-lead（分诊/三控制模式/单元级生产/工作流
-    推导协议），并接入 systemPrompt。
-- **无限画布**（自研视觉语言 + DSH 完全掌控）：
-  - Tab 化编辑坞（画布/图片编辑/视频编辑）入驻布局右栏（挤压主会话、
-    窄屏自动收起、原生拖宽）；纯黑画布、16px 幽灵卡片、白 95% 选中描边、
-    图标幽灵工具栏+白色胶囊主按钮、画布标题栏；
-  - 交互：分组随动、框选、右键菜单（画布/节点）、双击重命名+加节点、
-    拖线到空白建节点、素材拖拽/本地导入/库搜索、6px 吸附对齐线、缩放手柄、
-    悬停操作条、视频节点内嵌播放器、快捷键体系（⌘D/⌫/Esc）、**撤销/重做**
-    （50 步）、导出 PNG 分镜板；
-  - 持久化：canvas.json（乐观并发 + 标题字段 + 读取迁移）+ 冲突仲裁 UI
-    （保留我的/载入最新）+ 重置自动备份（设置页两步确认）；
-  - agent 完全掌控：9 个画布工具（get/add/connect/update/remove/arrange/
-    replace/clear + 状态查询）；编辑器产物反向落画布。
-
-- **视频模型模式矩阵**（协议均按官方文档一手核实，8 个真实模式 + mock）：
-  - `kling`（legacy JWT：base64 无 data: 前缀、默认 kling-v3、15s、音画参数）；
-  - `kling-v3`（新标准：Bearer + 模型入路径 + GET /tasks + 4K + muti_shot）；
-  - `runway`（gen4.5 首帧-only 护栏）；
-  - `minimax-h3`（官方 v2：多模态 content[] + 2K）；
-  - `vidu`（Token 鉴权 + subjects 多主体 + 音画同出）；
-  - `veo`（Gemini LRO + 时间戳多镜头提示词）；
-  - `openai-videos`（Sora 2：string seconds 枚举 + input_reference）；
-  - `modelverse-tasks`（豆包 Seedance 等任务协议）。
-- **主流视频模型直连接入**（协议均按官方文档/官方仓库一手核实）：
-  - `kling` 模式：可灵 Kling 直连（AK/SK → HS256 JWT 鉴权；text2video /
-    image2video + 首尾帧；任务轮询路径为创建路径+id）；设置页新增 AK/SK 字段；
-  - `runway` 模式：Runway Gen-4.5 / gen4_turbo / veo3.1 / **hailuo3**（Runway
-    平台内的海螺 3.0）直连（Bearer + x-runway-version；promptImage
-    {uri,position} 首/尾帧结构；像素比例表）；设置页新增版本头字段；
-  - 豆包 Seedance 与 MiniMax-H3 继续由 `modelverse-tasks` 模式覆盖。
-  - 协议往返测试：Kling JWT 签名 + 提交/轮询/下载、Runway 提交/轮询/下载
-    （31/31 全绿）。
-- **制作闭环三件套**：
-  - `mont_transcribe_audio`（openai-transcriptions 协议 + mock）：本地音视频
-    → 转写文本，支持 json/text/**srt** 输出，srt 落盘 `outputDir/transcripts/`
-    打通字幕链路；
-  - `mont_probe_media` / `mont_extract_frames`（ffmpeg/ffprobe，软依赖
-    友好降级）：媒体元数据探测 + 抽帧 PNG（`outputDir/frames/`），打通
-    frame-qa 抽帧质检闭环；
-  - 视频生成卡片实时进度：`GET /montagex/media/tasks` 任务列表路由 + 生成卡片
-    轮询显示「已提交排队/已完成/失败/已取消」。
-- **视频编辑器音频轨（wavesurfer.js）**：波形显示（点击定位主预览）、导入/
-  更换/移除音频、0–200% 音量滑杆；导出时经 WebAV AudioClip 混入成片
-  （AAC 音轨）。已实测：440Hz 测试音混入 3.09s MP4（volumedetect
-  mean -21.2dB，非静音）。
-- **子代理编排注入**（`src/subagents.ts`）：经 Harness 的
-  `subagents.registerContinuableSetup` 扩展点，为每个可续子代理上下文安装
-  MontageX 编排纪律（systemPrompt section + `montagex-subagent-orchestration`
-  技能，随贡献回收）。全局技能/工具对一次性子代理同样可见（已验证）。
-- **Workflow 提示词编排**：新增 `workflows/montagex-pipeline.js` 流水线模板
-  （剧本分镜 → 并行提示词工坊 → 并行生成 → 质检 → 组装方案，支持 dryRun
-  零成本验证）与 `montagex-workflow` 技能（含编排纪律与使用说明）；
-  systemPrompt 增加「多镜头项目用 workflow 编排，不串行生成」纪律。
-  - 已实测：4 子代理 dry-run 流水线跑通，分镜/提示词/四道闸门质检全部产出
-    结构化结果（子代理实际引用知识库 115/125/53/116）。
-- WebUI 右侧编辑面板（前序）：tui.image-editor 图片 PS 编辑器 + WebAV 时间线
-  编辑器 + 保存回传（POST /montagex/media、edits 账本、mont_edits）。
-- **WebUI 右侧编辑面板（编辑坞，前序详表）**：注册在 `shell.overlay` 的右侧
-  停靠面板 + 悬浮把手；生成卡片上出现「✏️ 编辑」按钮。
-  - 图像 → **PS 式编辑器**：tui.image-editor（MIT，7.6k★；裁剪/旋转/翻转/
-    滤镜/画笔/文字/形状/缩放/撤销重做），导出 PNG 保存回传；
-  - 视频 → **时间线编辑器**：自建 React 时间线（播放头分割、片段删除/重排、
-    时长刻度）+ WebAV（MIT，2k★，活跃维护）做 WebCodecs 解码与 MP4 导出；
-  - 参考实现与备选：omniclip（MIT，活跃）为时间线 UI 参考；filerobot/
-    react-filerobot-image-editor（MIT，活跃）因依赖 react-konva 与 React
-    18.3 的内部 API 不兼容，未采用（详见 architecture）。
-  - 宿主保存回写：`POST /montagex/media` 流式写入 `outputDir/edited/`（512MB
-    上限、媒体类型白名单、跨源 403），追加 `edits.jsonl`；`GET /montagex/media/edits`
-    列出历史；`mont_edits` 工具供 DSH 引用。
-  - 浏览器端到端验证：真实 GUI 打开面板、tui 编辑器渲染、WebAV 分割/重排/
-    导出 3.09s MP4、图片与视频保存回传全部通过。
-
-### Added（前序）
-
-- WebUI 生成卡片：`mont_generate_image` / `mont_generate_video` /
-  `mont_generate_audio` 在对话流中渲染专属工具卡片，运行中显示提示词与
-  状态，结束后内联预览图像 / 视频 / 音频（`<img>` / `<video>` / `<audio>`）；
-  `mont_view_image` 卡片显示问题、回答文本与可预览的源图。
-- 宿主媒体路由 `GET /montagex/media`：流式供给 `outputDir` 内的生成物，支持
-  HTTP Range 与同源校验；无 web 服务器的 profile 下自动降级为 no-op。
-- 任务账本（`<outputDir>/tasks.jsonl`，追加式）与两个新工具：
-  - `mont_task_status` —— 查询单个任务的最新状态或列出最近任务；
-  - `mont_cancel_task` —— 取消进行中/孤儿任务，轮询循环在下次账本检查时
-    中止；超时或中断后可通过账本找回 provider 任务。
-- 异步生成（openai-videos / modelverse-tasks 的图像与视频）自动记录
-  submitted / succeeded / failed / cancelled 状态转换，成功记录附带结果
-  URLs 与本地文件路径。
-- 媒体路由测试（路径逃逸、Range、查询解析、文件检查）与编译产物级 handler
-  端到端验证脚本；新增任务账本测试（追加/折叠/取消/轮询中止）与
-  modelverse-tasks HTTP round-trip 测试。
+- 首发 **GitHub Release v0.2.0**，产物见 Releases 页；画布菜单文案随品牌统一更新。
 
 ## [0.1.0] - 初始版本
 
