@@ -756,15 +756,29 @@ function StageInner(props: StageProps): ReactNode {
   }, [load, project])
 
   useEffect(() => {
-    void fetch('/montagex/projects').then(item => item.json()).then((data: { projects?: ProjectInfo[] }) => {
-      const list = data.projects ?? []
-      setProjects(list)
-      const next = pickDefaultProject(list, props.preferredProject)
-      if (next !== undefined) {
-        setClientProject(next)
-        setProject(next)
-      }
-    }).catch(() => {})
+    // Check the status before parsing: an unregistered route answers 404 with an
+    // empty body, and `.json()` on that throws "Unexpected end of JSON input" —
+    // a message that names neither the route nor the reason, so the failure used
+    // to vanish into the empty catch below.
+    void fetch('/montagex/projects')
+      .then(async item => {
+        if (!item.ok) throw new Error(`GET /montagex/projects -> HTTP ${item.status}`)
+        return item.json() as Promise<{ projects?: ProjectInfo[] }>
+      })
+      .then((data: { projects?: ProjectInfo[] }) => {
+        const list = data.projects ?? []
+        setProjects(list)
+        const next = pickDefaultProject(list, props.preferredProject)
+        if (next !== undefined) {
+          setClientProject(next)
+          setProject(next)
+        }
+      })
+      .catch((cause: unknown) => {
+        // The stage still renders without a project list; surface why in the
+        // console so a missing route is diagnosable instead of silent.
+        console.warn('montagex stage: project list unavailable —', cause instanceof Error ? cause.message : String(cause))
+      })
   }, [props.preferredProject])
 
   useEffect(() => {

@@ -12,6 +12,11 @@ async function walk(dir) {
   const out = []
   for (const entry of await readdir(dir, { withFileTypes: true })) {
     if (entry.name === 'node_modules' || entry.name === '.git' || entry.name === 'lib' || entry.name === 'package-lock.json') continue
+    // pnpm's lockfile records each dependency's own `deprecated` text, which can
+    // quote that dependency's issue tracker. Those URLs are package metadata we
+    // do not author and cannot remove without breaking the lockfile, so the
+    // "no unrelated repository URLs" rule targets prose and source, not it.
+    if (entry.name === 'pnpm-lock.yaml') continue
     const path = join(dir, entry.name)
     if (entry.isDirectory()) out.push(...await walk(path))
     else if (SCAN_EXTS.has(entry.name.slice(entry.name.lastIndexOf('.')))) out.push(path)

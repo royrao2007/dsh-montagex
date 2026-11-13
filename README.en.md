@@ -87,11 +87,9 @@ dsh plugin --profile web add github:royrao2007/dsh-montagex
 
 > The field accepts a package name, a `github:` shorthand or complete git URL, or
 > an absolute local directory. The slash form `royrao2007/dsh-montagex` is **not**
-> accepted, and neither is a double-protocol mirror prefix such as
-> `https://gh-proxy.com/https://github.com/...`
-> (it fails with `a URL must point at a git repository or a tarball`).
-> When GitHub is unreachable, use the npm name or
-> `git@github.com:royrao2007/dsh-montagex.git`.
+> accepted, and neither is a double-protocol mirror prefix (two `https://` in one
+> URL) — it fails with `a URL must point at a git repository or a tarball`.
+> When the default host is unreachable, use the npm package name instead.
 
 Open **Settings → MontageX** and switch each of the four capabilities:
 Vision / Image / Video / Audio.

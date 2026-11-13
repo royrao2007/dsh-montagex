@@ -98,7 +98,7 @@ dsh web
 >
 > 网络连不上 GitHub 时：双协议镜像前缀（`https://gh-proxy.com/https://...`）
 > 会被拒绝（`a URL must point at a git repository or a tarball`）。改用
-> `git@github.com:royrao2007/dsh-montagex.git`，或把仓库镜像到你能访问的 git 服务再填完整地址。
+> 改用 npm 包名，或把仓库镜像到你能访问的 git 服务再填完整地址。
 
 装好后在 **Settings → MontageX** 配四个能力；关闭某个能力后其对应工具会立刻从
 模型工具目录消失，不需要重启。

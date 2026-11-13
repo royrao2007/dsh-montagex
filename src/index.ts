@@ -30,7 +30,22 @@ export { runVideo, mockVideo } from './providers/video.ts'
 export { runVision, mockVision } from './providers/vision.ts'
 
 export const name = 'montagex'
-export const inject = ['tools', 'skills', 'systemPrompt', 'settings', 'llm']
+// `webServer` must be here: every register*Route helper looks it up with
+// ctx.get('webServer') and returns a no-op disposer when it is absent. Without
+// the injection the plugin applies before the HTTP service exists, so all
+// /montagex/* routes are never registered and every browser request answers
+// 404 with an empty body — which the client surfaces as "Unexpected end of
+// JSON input" rather than a visible failure.
+//
+// `configEditor` belongs here too: persisting a settings change needs the
+// profile's config editor, and its absence is what makes a save fail after the
+// UI has already shown the new value. Injecting it guarantees the service is
+// present before apply() runs, instead of racing the loader.
+//
+// `workspace` and `subagents` are deliberately NOT injected: both are optional
+// integrations with documented fallbacks (disk scan / graceful degradation), and
+// waiting on them would delay the plugin for features it can live without.
+export const inject = ['tools', 'skills', 'systemPrompt', 'settings', 'llm', 'webServer', 'configEditor']
 
 /**
  * The plugin's own Config. DSH 0.2.x resolves this from the Loader row and
