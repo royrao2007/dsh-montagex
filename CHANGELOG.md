@@ -23,6 +23,17 @@
 
 - 首发 **GitHub Release v0.2.0**，产物见 Releases 页；画布菜单文案随品牌统一更新。
 
+## [0.2.1] - 2026-11-13
+
+### Fixed
+
+- **设置页与所有 `/montagex/*` 路由终于真的注册了**：插件的 `inject` 少了 `webServer`，于是 `apply()` 在 HTTP 服务就绪前执行，`ctx.get('webServer')` 返回 `undefined`，18 个 `register*Route` 全部静默返回空 disposer。表现为「测试连接」「接入新模型」以及画布请求一律失败，浏览器只看到 `Failed to execute 'json' on 'Response': Unexpected end of JSON input`——因为服务器对未注册路由回 404 且空响应体。
+- **安装文档里两个会误导的表述**：双协议镜像前缀与 ssh 远端地址都不被输入框接受，README 现改用不含主机名的说法，避免用户照抄后撞上 `a URL must point at a git repository or a tarball`。
+- **安装失败的两个常见报错写进 README**：`ERR_PNPM_IGNORED_BUILDS`（`canvas` 构建被拦）与 `ERR_PNPM_EPERM`（DSH 运行时占用目录句柄），各给出一条处置办法，并说明两者都不影响装好后的使用。
+### Release
+
+- 发布 **GitHub Release v0.2.1** 与 npm `dsh-montagex@0.2.1`；画布菜单与设置页文案随本次修复一并校正。
+
 ## [Unreleased]
 
 ### Fixed

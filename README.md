@@ -97,9 +97,9 @@ dsh plugin --profile web add github:royrao2007/dsh-montagex
 
 > 输入框接受三种内容：npm 包名、`github:` 简写或完整 git 仓库地址、本地绝对目录。
 > `royrao2007/dsh-montagex` 这种斜杠形式**不接受**；
-> `https://gh-proxy.com/https://github.com/...` 这种双协议前缀也**不接受**
+> 一个 URL 里套两个 `https://` 这种双协议镜像前缀也**不接受**
 > （会报 `a URL must point at a git repository or a tarball`）。
-> 连不上 GitHub 时用 npm 包名，或 `git@github.com:royrao2007/dsh-montagex.git`。
+> 连不上默认主机时，改用 npm 包名安装。
 
 打开 **Settings → MontageX**，四个能力各自开关：Vision / Image / Video / Audio。
 
