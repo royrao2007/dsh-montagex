@@ -76,26 +76,57 @@ mont_team_whoami         查角色与权限矩阵
 
 ## 快速开始
 
-**从 GitHub 安装**（当前推荐的线上方式）：
+**从 npm 安装**（推荐，最短）：
 
 ```bash
-dsh plugin --profile web add github:royrao2007/dsh-montagex
+dsh plugin --profile web add dsh-montagex
 dsh web
 ```
 
-也可以直接填仓库地址，效果相同：
+**在 WebUI 里装**：打开「插件 → 添加插件」，输入框只填 `dsh-montagex`（**不是**整行终端命令，也不要带 `dsh plugin --profile web add` 前缀）。
+
+其它等价写法：
 
 ```bash
-dsh plugin --profile web add https://github.com/royrao2007/dsh-montagex
+# 指定版本
+dsh plugin --profile web add dsh-montagex@0.2.0
+
+# 直接从 GitHub 装（npm 不可达时）
+dsh plugin --profile web add github:royrao2007/dsh-montagex
 ```
 
-**在 WebUI 里装**：打开「插件 → 添加插件」，输入框填 `github:royrao2007/dsh-montagex`（**不是**整行终端命令）。它只接受三种内容：npm 包名、`github:` 简写或仓库地址、本地目录路径。
-
-> **关于裸包名**：输入框只校验名称格式，所以 `dsh-montagex` 能通过校验；但这个包目前还没发布到 npm，安装阶段会报 `ERR_PNPM_FETCH_404`。用上面的 `github:` 写法。
->
-> **关于镜像**：包装器只接受「完整的 git 仓库地址」，`https://gh-proxy.com/https://github.com/...` 这种双协议前缀会被拒绝（`a URL must point at a git repository or a tarball`）。连不上 GitHub 时，用带凭据的 `git@github.com:royrao2007/dsh-montagex.git`，或先把仓库镜像到你自己的 git 服务再用完整地址。
+> 输入框接受三种内容：npm 包名、`github:` 简写或完整 git 仓库地址、本地绝对目录。
+> `royrao2007/dsh-montagex` 这种斜杠形式**不接受**；
+> `https://gh-proxy.com/https://github.com/...` 这种双协议前缀也**不接受**
+> （会报 `a URL must point at a git repository or a tarball`）。
+> 连不上 GitHub 时用 npm 包名，或 `git@github.com:royrao2007/dsh-montagex.git`。
 
 打开 **Settings → MontageX**，四个能力各自开关：Vision / Image / Video / Audio。
+
+### 安装时可能遇到的两个报错
+
+**① `ERR_PNPM_IGNORED_BUILDS: canvas@2.11.2`**
+
+`canvas` 是 `fabric`（经 `tui-image-editor` 引入）的可选原生依赖，Windows 上常编译失败。它**不影响 MontageX**，但 pnpm 11 默认把「未批准的构建脚本」当错误，导致安装被判定为失败。
+
+在 profile 目录的 `pnpm-workspace.yaml` 里加一行即可：
+
+```yaml
+allowBuilds:
+  canvas: false
+```
+
+profile 目录通常是：
+- Windows：`%USERPROFILE%\.dsh\profiles\<profile>`
+- 或 DSH 设置里指定的 DSH_HOME 下的 `profiles\<profile>`
+
+**② `ERR_PNPM_EPERM: rename <pkg>_tmp_* -> <pkg>`**
+
+pnpm 把包从临时目录改名成正式目录时被 Windows 拒绝。**原因是 DSH 正在运行**——它的进程持有 `node_modules` 里的目录句柄。
+
+处理办法：**完全退出 DSH**（托盘图标右键退出，不是关窗口），再安装。若仍有残留，删掉 `node_modules` 下所有 `*_tmp_*` 目录后重试。
+
+装完这两个问题都不影响使用：确认 `node_modules/dsh-montagex/lib/index.js` 存在即可。
 
 没有 API Key 也能用：把四个能力切 `mock`，可以完整跑通 分诊 → 分镜 → 生成 → 拼装 → 质检，先把流程验通，再填 Key。
 

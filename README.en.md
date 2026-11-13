@@ -64,36 +64,69 @@ mont_team_whoami         role and permission matrix
 
 ## Quick start
 
-**Install from GitHub** (the current online path):
+**Install from npm** (recommended, shortest):
 
 ```bash
-dsh plugin --profile web add github:royrao2007/dsh-montagex
+dsh plugin --profile web add dsh-montagex
 dsh web
 ```
 
-The repository URL works the same way:
+**From the Web UI:** open *Plugins → Add plugin* and enter just
+`dsh-montagex` — not a whole terminal command line, and without the
+`dsh plugin --profile web add` prefix.
+
+Equivalent forms:
 
 ```bash
-dsh plugin --profile web add https://github.com/royrao2007/dsh-montagex
+# Pin a version
+dsh plugin --profile web add dsh-montagex@0.2.0
+
+# Install straight from GitHub, when npm is unreachable
+dsh plugin --profile web add github:royrao2007/dsh-montagex
 ```
 
-**From the Web UI:** open *Plugins → Add plugin* and enter
-`github:royrao2007/dsh-montagex` — the field takes a package name, a git
-shorthand or repository URL, or a local directory. It does **not** take a whole
-terminal command line.
-
-> **About the bare name.** The dialog only validates the name's shape, so
-> `dsh-montagex` is accepted there; but the package is not published to npm yet,
-> so the install step fails with `ERR_PNPM_FETCH_404`. Use the `github:` form.
->
-> **About mirrors.** The wrapper accepts a complete git URL only;
-> `https://gh-proxy.com/https://github.com/...` is rejected with
-> `a URL must point at a git repository or a tarball`. If GitHub is unreachable,
-> use `git@github.com:royrao2007/dsh-montagex.git`, or mirror the repository to
-> a git host you can reach and use that full URL.
+> The field accepts a package name, a `github:` shorthand or complete git URL, or
+> an absolute local directory. The slash form `royrao2007/dsh-montagex` is **not**
+> accepted, and neither is a double-protocol mirror prefix such as
+> `https://gh-proxy.com/https://github.com/...`
+> (it fails with `a URL must point at a git repository or a tarball`).
+> When GitHub is unreachable, use the npm name or
+> `git@github.com:royrao2007/dsh-montagex.git`.
 
 Open **Settings → MontageX** and switch each of the four capabilities:
 Vision / Image / Video / Audio.
+
+### Two install errors you may hit
+
+**① `ERR_PNPM_IGNORED_BUILDS: canvas@2.11.2`**
+
+`canvas` is an optional native dependency of `fabric` (pulled in through
+`tui-image-editor`), and it frequently fails to compile on Windows. It does
+**not** affect MontageX, but pnpm 11 treats an unapproved build script as an
+error, so the install is reported as failed.
+
+Add one line to the profile's `pnpm-workspace.yaml`:
+
+```yaml
+allowBuilds:
+  canvas: false
+```
+
+The profile directory is normally `%USERPROFILE%\.dsh\profiles\<profile>`, or
+`profiles\<profile>` under the DSH_HOME set in DSH's settings.
+
+**② `ERR_PNPM_EPERM: rename <pkg>_tmp_* -> <pkg>`**
+
+pnpm could not rename a package's temp directory to its final name because
+Windows refused. The cause is **DSH still running** — its processes hold
+directory handles inside `node_modules`.
+
+Fully quit DSH first (right-click the tray icon → Quit, not just closing the
+window), then install. If debris remains, delete every `*_tmp_*` directory under
+`node_modules` and retry.
+
+Neither error affects the finished install: check that
+`node_modules/dsh-montagex/lib/index.js` exists and you are good.
 
 No API key is required to try it: set all four capabilities to `mock` and the
 whole chain — triage → storyboard → generate → assemble → QC — runs end to end,

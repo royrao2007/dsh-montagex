@@ -25,6 +25,11 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- **安装不再因 `canvas` 构建被拦而失败**：`canvas` 经 `fabric`（`tui-image-editor`）引入，是可选原生依赖，Windows 上常编译失败；pnpm 11 会把未批准的构建脚本视为错误，导致安装被判定失败。README 现记录两种常见报错的处置方式——
+  `allowBuilds: { canvas: false }` 用于消除 `ERR_PNPM_IGNORED_BUILDS`；完全退出 DSH 后再安装，用于消除 `ERR_PNPM_EPERM`（运行时目录句柄被占用，pnpm 无法把 `_tmp_` 目录改名为正式目录）。两者均不影响装好后的使用。
+
 ### Added
 
 - **DeepSeek 第一方多模态（适配 DSH 0.1.1-rc.1）**：Vision 新增 `deepseek-chat` 模式并设为默认，直连官方 `https://api.deepseek.com` chat 协议，默认模型 `deepseek-v4-flash-vision-exp`（宿主 0.1.1-rc.1 在 `deepseek-official` 路由发布的第一方视觉模型，`inputModalities: text+image`）。对齐上游线格式：图片一律内联为 `image_url` data URL（PNG/JPEG/WebP/GIF；15 MiB 原始 ≈ 上游 20 MiB base64 载荷上限），不发外部 URL；Key 回退 `DEEPSEEK_API_KEY`（与 DSH 同一凭据）。接入分诊（classify）新增第一方指纹，设置页 Vision 默认值与模型候选同步更新，连接测试兼容该端点。
