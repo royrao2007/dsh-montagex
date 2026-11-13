@@ -1,0 +1,22 @@
+# Normalise line endings in the repository so the committed blob is stable
+# regardless of which platform or tool wrote the working tree last. Without
+# this, a Windows checkout re-writes CRLF and every file appears modified.
+* text=auto eol=lf
+
+# Binary assets must never be converted.
+*.wasm binary
+*.glb binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.mp4 binary
+*.ico binary
+
+# Build output keeps its exact bytes; a conversion would change the hash and
+# make the committed artifact diverge from what the build produces.
+lib/edit/assets/* -text
+lib/stage/*.js -text
+lib/stage/chunks/*.js -text
+lib/vendor/* -text
