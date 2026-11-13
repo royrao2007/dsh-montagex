@@ -82,12 +82,15 @@ dsh plugin --profile web add https://github.com/royrao2007/dsh-montagex
 shorthand or repository URL, or a local directory. It does **not** take a whole
 terminal command line.
 
-> `dsh-montagex` is not published to npm yet, so the bare name `dsh-montagex`
-> fails with `not a package name the registry accepts`. Use one of the forms
-> above.
+> **About the bare name.** The dialog only validates the name's shape, so
+> `dsh-montagex` is accepted there; but the package is not published to npm yet,
+> so the install step fails with `ERR_PNPM_FETCH_404`. Use the `github:` form.
 >
-> If GitHub is unreachable from your network, prefix the URL with a mirror, for
-> example `https://gh-proxy.com/https://github.com/royrao2007/dsh-montagex`.
+> **About mirrors.** The wrapper accepts a complete git URL only;
+> `https://gh-proxy.com/https://github.com/...` is rejected with
+> `a URL must point at a git repository or a tarball`. If GitHub is unreachable,
+> use `git@github.com:royrao2007/dsh-montagex.git`, or mirror the repository to
+> a git host you can reach and use that full URL.
 
 Open **Settings → MontageX** and switch each of the four capabilities:
 Vision / Image / Video / Audio.

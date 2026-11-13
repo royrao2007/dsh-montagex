@@ -93,11 +93,12 @@ dsh web
 （该框只接受 npm 包名、`github:` 简写或仓库地址、本地目录三种内容，
 不要填整行终端命令）。
 
-> `dsh-montagex` 尚未发布到 npm，因此只填裸包名 `dsh-montagex` 会报
-> `not a package name the registry accepts`。用上面两种之一。
+> 输入框只校验名称格式，所以 `dsh-montagex` 能通过校验；但该包还没发布到 npm，
+> 安装阶段会报 `ERR_PNPM_FETCH_404`。用上面两种之一。
 >
-> 网络连不上 GitHub 时，可换成镜像前缀，例如
-> `https://gh-proxy.com/https://github.com/royrao2007/dsh-montagex`。
+> 网络连不上 GitHub 时：双协议镜像前缀（`https://gh-proxy.com/https://...`）
+> 会被拒绝（`a URL must point at a git repository or a tarball`）。改用
+> `git@github.com:royrao2007/dsh-montagex.git`，或把仓库镜像到你能访问的 git 服务再填完整地址。
 
 装好后在 **Settings → MontageX** 配四个能力；关闭某个能力后其对应工具会立刻从
 模型工具目录消失，不需要重启。

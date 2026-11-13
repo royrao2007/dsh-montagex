@@ -91,9 +91,9 @@ dsh plugin --profile web add https://github.com/royrao2007/dsh-montagex
 
 **在 WebUI 里装**：打开「插件 → 添加插件」，输入框填 `github:royrao2007/dsh-montagex`（**不是**整行终端命令）。它只接受三种内容：npm 包名、`github:` 简写或仓库地址、本地目录路径。
 
-> `dsh-montagex` 尚未发布到 npm，所以填裸包名 `dsh-montagex` 会报 `not a package name the registry accepts`。用上面两条之一。
+> **关于裸包名**：输入框只校验名称格式，所以 `dsh-montagex` 能通过校验；但这个包目前还没发布到 npm，安装阶段会报 `ERR_PNPM_FETCH_404`。用上面的 `github:` 写法。
 >
-> 若你的网络连不上 GitHub，可以把 `github:` 换成任一镜像前缀，例如 `https://gh-proxy.com/https://github.com/royrao2007/dsh-montagex`。
+> **关于镜像**：包装器只接受「完整的 git 仓库地址」，`https://gh-proxy.com/https://github.com/...` 这种双协议前缀会被拒绝（`a URL must point at a git repository or a tarball`）。连不上 GitHub 时，用带凭据的 `git@github.com:royrao2007/dsh-montagex.git`，或先把仓库镜像到你自己的 git 服务再用完整地址。
 
 打开 **Settings → MontageX**，四个能力各自开关：Vision / Image / Video / Audio。
 
