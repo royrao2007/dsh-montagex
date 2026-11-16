@@ -1,3 +1,8 @@
+## 0.2.3 — 2026-11-17
+
+新增插件市场图标 `assets/icon-180.png`（白底蓝渐变标志），供 awesome-dsh-plugin 收录条目与市场卡片使用。
+
+
 # Changelog
 
 本文件记录 dsh-montagex 的用户可见变更。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
