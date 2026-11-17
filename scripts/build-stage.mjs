@@ -44,6 +44,15 @@ const REWRITES = [
 
 const rewrite = (source) => REWRITES.reduce((text, [from, to]) => text.split(from).join(to), source)
 
+/**
+ * Read a text source with LF endings. Windows checkouts can hand back CRLF
+ * (core.autocrlf), and esbuild carries CRLF inside multiline string literals
+ * into the bundle — which changes chunk hashes and makes the committed lib
+ * differ from what Linux CI builds. Normalising here keeps both platforms on
+ * the same bytes.
+ */
+const readNormalized = async path => (await readFile(path, 'utf8')).replace(/\r\n/g, '\n')
+
 /** 不会进入重写集合（min vendor chunk 与加载器 blob，改动风险大于收益）。 */
 const NO_REWRITE = new Set(['index-Bt3LoRYv.js', 'plyLoader-ChQmPnxM.js', 'spzLoader-CU_GD7s0.js', 'phone-DyeVK3Rl.js'])
 
@@ -91,7 +100,7 @@ const rewritePlugin = {
       if (!args.path.startsWith(WEB)) return undefined
       const base = args.path.slice(WEB.length + 1)
       if (NO_REWRITE.has(base)) return undefined
-      const source = await readFile(args.path, 'utf8')
+      const source = await readNormalized(args.path)
       return {
         contents: rewrite(source),
         loader: args.path.endsWith('.jsx') ? 'jsx' : args.path.endsWith('.ts') ? 'ts' : args.path.endsWith('.tsx') ? 'tsx' : 'jsx',
@@ -127,15 +136,17 @@ export async function buildStage() {
   })
 
   for (const file of CLASSIC_SCRIPTS) {
-    await writeFile(join(OUT, file), rewrite(await readFile(join(WEB, file), 'utf8')))
+    await writeFile(join(OUT, file), rewrite(await readNormalized(join(WEB, file))))
   }
   for (const file of STATIC_FILES) {
-    await copyFile(join(WEB, file), join(OUT, file))
+    const source = join(WEB, file)
+    if (/\.(js|css|html|svg)$/.test(file)) await writeFile(join(OUT, file), await readNormalized(source))
+    else await copyFile(source, join(OUT, file))
   }
   await cp(join(WEB, 'models'), join(OUT, 'models'), { recursive: true })
   await cp(join(WEB, 'luts'), join(OUT, 'luts'), { recursive: true })
   await cp(VCAM, join(OUT, 'vcam'), { recursive: true })
-  await copyFile(join(HOST, 'dsh-host.js'), join(OUT, 'dsh-host.js'))
+  await writeFile(join(OUT, 'dsh-host.js'), await readNormalized(join(HOST, 'dsh-host.js')))
 
   await writeFile(join(OUT, 'index.html'), `<!doctype html>
 <html lang="zh-CN">
