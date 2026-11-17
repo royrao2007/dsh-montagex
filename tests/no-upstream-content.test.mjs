@@ -12,6 +12,10 @@ async function walk(dir) {
   const out = []
   for (const entry of await readdir(dir, { withFileTypes: true })) {
     if (entry.name === 'node_modules' || entry.name === '.git' || entry.name === 'lib' || entry.name === 'package-lock.json') continue
+    // Working memory and local version copies are not shipped (see .gitignore
+    // and package.json `files`), so third-party links quoted there are not
+    // repository prose.
+    if (entry.name === 'memory' || entry.name === 'MEMORY.md' || entry.name === '_versions') continue
     // pnpm's lockfile records each dependency's own `deprecated` text, which can
     // quote that dependency's issue tracker. Those URLs are package metadata we
     // do not author and cannot remove without breaking the lockfile, so the

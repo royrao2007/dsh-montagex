@@ -7,7 +7,7 @@ MontageX 是一个 `dsh-plugin`，跑在 DeepSeek Harness（DSH）里：把一�
 > 🇬🇧 **English overview:** MontageX is a full-pipeline AI video production harness for
 > [DeepSeek Harness](https://www.deepseek.com/en/harness/). One request becomes a typed
 > brief, a shot plan, a storyboard, generated media, an assembled timeline and a
-> deterministic QC report. It registers **161 tools**: 153 production tools (brief
+> deterministic QC report. It registers **162 tools**: 154 production tools (brief
 > triage, planning, storyboard, image/video/audio generation, infinite shot canvas,
 > ffmpeg editing, grading, subtitles, QC) plus **8 team-collaboration tools**. It ships
 > 359 knowledge articles, 196 skills and 15 recipes. Everything local (editing,
@@ -39,11 +39,11 @@ MontageX 是一个 `dsh-plugin`，跑在 DeepSeek Harness（DSH）里：把一�
 | 分镜 | 分镜格与累计时间轴，一格一镜，随时回答「现在到第几秒」 |
 | 生成 | 图像 / 视频 / 音频，协议可换，无 Key 时走 mock 跑通全链 |
 | 画布 | 无限分镜画布：镜头卡、连线、分组、按幕排布 |
-| 剪辑 | 时间线、精剪、混音、字幕、调色，全部本地 ffmpeg |
+| 剪辑 | 时间线、精剪、混音、字幕、调色，全部本地 ffmpeg；可导出 FCPXML 与剪映草稿 |
 | 质检 | 时长/画幅/黑场/响度/节奏的确定性检查，不靠模型「感觉过了」 |
 | 团队 | 角色权限、镜头认领、批注、签核闸——见下 |
 
-**161 个工具**，前缀 `mont_`；知识库 359 篇、技能 196 个、配方 15 个。
+**162 个工具**，前缀 `mont_`；知识库 359 篇、技能 196 个、配方 15 个。
 
 ---
 
