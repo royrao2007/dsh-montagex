@@ -10,7 +10,7 @@ test('CI workflow pins node 22.19, npm ci, npm test, and lib/ sync', () => {
   assert.match(text, /node-version:\s*'22\.19'/)
   assert.match(text, /npm ci/)
   assert.match(text, /npm test/)
-  assert.match(text, /git diff --quiet lib\//)
+  assert.match(text, /git diff --ignore-cr-at-eol --quiet lib\//)
   assert.match(text, /stale lib\//)
   assert.match(text, /apt-get install -y ffmpeg/)
 })
