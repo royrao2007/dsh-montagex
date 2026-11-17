@@ -18,11 +18,11 @@ pipeline.
 | Storyboard | Cells on one continuous timeline: one shot per cell, with "where am I in the cut" always answerable |
 | Generation | Image / video / audio; swappable protocols; full pipeline runs on `mock` with no API key |
 | Canvas | Infinite shot board: 16:9 cards, live wiring, grouping, act-based layout |
-| Editing | Timeline, smart cut, mixing, subtitles, grading — all local ffmpeg |
+| Editing | Timeline, smart cut, mixing, subtitles, grading — all local ffmpeg; exports FCPXML and Jianying/CapCut drafts |
 | QC | Deterministic checks for duration, aspect, black frames, loudness and pacing; the model never "feels" that it passed |
 | Team | Roles, shot claiming, shot-level review notes and signing gates — see below |
 
-**161 tools**, all prefixed `mont_`: 153 production tools plus 8 team tools.
+**162 tools**, all prefixed `mont_`: 154 production tools plus 8 team tools.
 Ships 359 knowledge articles, 196 skills and 15 recipes.
 
 ---

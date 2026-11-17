@@ -1,11 +1,25 @@
-## 0.2.3 — 2026-11-17
-
-新增插件市场图标 `assets/icon-180.png`（白底蓝渐变标志），供 awesome-dsh-plugin 收录条目与市场卡片使用。
-
-
 # Changelog
 
 本文件记录 dsh-montagex 的用户可见变更。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
+
+## [0.2.6] - 2026-11-18
+
+### Added
+
+- **FCPXML 1.10 导出（`mont_fcpxml_export`）**：把时间线导出成 Premiere Pro、DaVinci Resolve、Final Cut Pro 可直接打开的工程。每个镜头仍是独立片段并指向原始素材，剪辑师可继续裁剪、调序、调色、替换镜头，而不是只拿到一版烧死的 mp4。
+- **导出契约**：镜头按顺序落在主时间线上（trim 变 in-point、offset 自动累加）；可挂多条音轨到独立 lane，线性音量自动换算 dB；字幕以同名 `.srt` 旁挂（三家对 FCPXML caption 支持不一致）；素材缺失默认整体报错并列出全部路径，`skipMissing` 才跳过。
+
+### Changed
+
+- 工具清单更新为 **162 个**（154 制作 + 8 团队），冻结快照、README 与本文同步。
+
+### Release
+
+- 发布 **GitHub Release v0.2.6** 与 npm `dsh-montagex@0.2.6`，版本号、本文与构建产物一致。
+
+## [0.2.5] - 2026-11-17
+
+新增插件市场图标 `assets/icon-180.png`（白底蓝渐变标志），供 awesome-dsh-plugin 收录条目与市场卡片使用。
 
 ## [Unreleased]
 

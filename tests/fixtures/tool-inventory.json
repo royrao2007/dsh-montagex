@@ -79,6 +79,7 @@
   "mont_edit_plan",
   "mont_edits",
   "mont_extract_frames",
+  "mont_fcpxml_export",
   "mont_generate_audio",
   "mont_generate_image",
   "mont_generate_ready",

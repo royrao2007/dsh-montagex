@@ -39,6 +39,7 @@ import { brief } from './providers/brief.ts'
 import { audioSync, cleanSpeechText, clipRank, editsToScenes, estimateSpeech, parseEditInstructions, renderTimeline, smartCut, srtLint, srtNormalize, subtitleCut, weightedWidth } from './providers/timeline.ts'
 import { formatSubtitles } from './providers/subtitle-format.ts'
 import { exportJianyingDraft } from './providers/jianying-export.ts'
+import { exportFcpxml } from './providers/fcpxml-export.ts'
 import { processAudioFile, type Effect, type VolumeKeyframe } from './providers/audio-engine.ts'
 import { videoUnderstand } from './providers/video-understand.ts'
 import { ProposalStore } from './proposals.ts'
@@ -2119,6 +2120,28 @@ export function syncTools(ctx: Context, settings: MontagexSettings, applyCapabil
     timeoutMs: 120_000,
     async execute(args: any) {
       return exportJianyingDraft({ ...args, outputDir: settings.outputDir })
+    },
+  })))
+
+  disposers.push(ctx.tools.register(safeDefine({
+    name: 'mont_fcpxml_export',
+    description: '把成片时间线导出为 FCPXML 1.10：Premiere Pro、DaVinci Resolve、Final Cut Pro 可直接打开继续精修。每个镜头仍是独立片段、仍指向原始素材（可再调用 mont_timeline 拿到 scenes），不是烧死的 mp4；可带一条或多条音轨（音量转 dB、独立 lane）与 SRT 旁挂字幕。',
+    parameters: {
+      name: { type: 'string', description: '工程名（剪辑软件里的项目名）。' },
+      scenes: { type: 'array', required: true, items: { type: 'object', additionalProperties: true }, description: '镜头数组：[{ source, name?, trim?: [start,end] }]；source 为绝对路径或相对输出目录的路径。' },
+      audio: { type: 'array', items: { type: 'object', additionalProperties: true }, description: '音轨数组：[{ path, name?, volume?, start?, trim?, lane? }]；volume 是线性增益（1 = 原音量）。' },
+      subtitle: { type: 'string', description: '可选 SRT 路径，作为同名 .srt 旁挂导出（不做内嵌）。' },
+      width: { type: 'number', description: '画幅宽（默认取首个视频素材，否则 1920）。' },
+      height: { type: 'number', description: '画幅高（默认取首个视频素材，否则 1080）。' },
+      frameRate: { type: 'number', description: '帧率：23.976 / 24 / 25 / 29.97 / 30 / 50 / 59.94 / 60；默认取首个素材，否则 25。' },
+      fileName: { type: 'string', description: '输出文件名主干（不含扩展名）。' },
+      skipMissing: { type: 'boolean', description: '素材缺失时跳过该镜头而不是整体报错（默认 false）。' },
+    },
+    output: objectOutput(),
+    timeoutMs: 300_000,
+    isConcurrencySafe: () => true,
+    async execute(args: any) {
+      return exportFcpxml({ ...args, outputDir: settings.outputDir })
     },
   })))
 

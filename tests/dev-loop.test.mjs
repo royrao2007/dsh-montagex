@@ -22,6 +22,9 @@ function initRepo(dir, name) {
   spawnSync('git', ['init', '-b', 'main'], { cwd: dir, encoding: 'utf8' })
   spawnSync('git', ['-C', dir, 'config', 'user.name', 'loop-test'])
   spawnSync('git', ['-C', dir, 'config', 'user.email', 'loop-test@example.test'])
+  // Pin line endings: a global core.autocrlf=true rewrites the fixtures on
+  // checkout/stash restore and makes byte comparisons fail on Windows.
+  spawnSync('git', ['-C', dir, 'config', 'core.autocrlf', 'false'])
   writeFileSync(join(dir, 'README.md'), `${name}\n`)
   mkdirSync(join(dir, 'scripts'), { recursive: true })
   writeFileSync(join(dir, 'scripts', 'loop-increment.json'), JSON.stringify({
