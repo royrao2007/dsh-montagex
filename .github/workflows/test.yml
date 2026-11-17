@@ -18,25 +18,13 @@ jobs:
       - run: ffmpeg -hide_banner -version | head -n 1
       - run: npm ci
       - run: npm test
-      - name: Upload built lib (cross-platform sync)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: built-lib
-          path: lib
-          retention-days: 1
       - name: lib/ matches the green build
         run: |
           # Byte equality across checkout platforms is not achievable: assets
           # copied with `cp` inherit the runner's line endings. Ignore only
           # CR-at-EOL noise; real content drift still fails the gate.
-          node -e "console.log('node', process.version)"
-          node -e "console.log('esbuild', require('esbuild/package.json').version)"
-          echo "--- app.js diff sample ---"
-          git diff --ignore-cr-at-eol -- lib/stage/app.js | head -n 120 || true
-          echo "--- stat ---"
-          git diff --ignore-cr-at-eol --stat lib/ || true
           if ! git diff --ignore-cr-at-eol --quiet lib/; then
             echo "::error title=stale lib/::Committed lib/ drifted from source. Run 'npm run build' locally and commit the result."
+            git diff --ignore-cr-at-eol --stat lib/
             exit 1
           fi
