@@ -18,6 +18,13 @@ jobs:
       - run: ffmpeg -hide_banner -version | head -n 1
       - run: npm ci
       - run: npm test
+      - name: Upload built lib (cross-platform sync)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: built-lib
+          path: lib
+          retention-days: 1
       - name: lib/ matches the green build
         run: |
           # Byte equality across checkout platforms is not achievable: assets

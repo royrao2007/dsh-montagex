@@ -99,10 +99,15 @@ const rewritePlugin = {
     b.onLoad({ namespace: 'file', filter: /.*/ }, async (args) => {
       if (!args.path.startsWith(WEB)) return undefined
       const base = args.path.slice(WEB.length + 1)
-      if (NO_REWRITE.has(base)) return undefined
-      const source = await readNormalized(args.path)
+      const normalized = await readNormalized(args.path)
+      if (NO_REWRITE.has(base)) {
+        // Vendor bundles keep their code untouched, but still read with LF:
+        // CRLF changes esbuild's content hash and renames every dynamic chunk
+        // that imports them.
+        return { contents: normalized, loader: 'js' }
+      }
       return {
-        contents: rewrite(source),
+        contents: rewrite(normalized),
         loader: args.path.endsWith('.jsx') ? 'jsx' : args.path.endsWith('.ts') ? 'ts' : args.path.endsWith('.tsx') ? 'tsx' : 'jsx',
       }
     })
