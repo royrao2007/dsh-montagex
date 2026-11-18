@@ -2,6 +2,16 @@
 
 本文件记录 dsh-montagex 的用户可见变更。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [0.2.7] - 2026-11-18
+
+### Fixed
+
+- **锁定节点不再被整份重写抹掉（`mont_canvas_replace` / 自动排版）**：`locked` 节点在整份画布重写时会被保留（内容、位置、连线），自动整理也不会移动它；只有显式 `locked=false` 解锁后，智能体才能改名、移动或删除。`reset` 与快照恢复仍是显式用户动作，可以清空。
+
+### Release
+
+- 发布 **GitHub Release v0.2.7** 与 npm `dsh-montagex@0.2.7`，版本号、本文与构建产物一致。
+
 ## [0.2.6] - 2026-11-18
 
 ### Added

@@ -152,6 +152,46 @@ function layoutStoryboard(nodes: CanvasNode[]): void {
   })
 }
 
+/** Fields a locked node keeps no matter what an agent writes over the canvas. */
+const LOCKED_PRESERVED_KEYS = [
+  'id', 'kind', 'label', 'path', 'parent', 'x', 'y', 'width', 'height', 'shotIndex',
+  'prompt', 'aiBrief', 'shotStatus', 'aspect', 'model', 'durationSec', 'lastError',
+  'count', 'characters', 'selectedTakeId', 'continuityRules', 'locked',
+] as const
+
+/**
+ * User pin protection: a locked node survives full-document rewrites and
+ * auto-layout. While it stays locked its fields win over the incoming doc;
+ * deleting it requires unlocking first (an incoming entry with locked=false
+ * is treated as the explicit unlock). Edges that touched a resurrected node
+ * come back too, so replace cannot quietly cut the user's wiring.
+ */
+export function preserveLockedNodes(saved: CanvasDocument, current: CanvasDocument): void {
+  const locked = current.nodes.filter(node => node.locked === true)
+  if (locked.length === 0) return
+  for (const node of locked) {
+    const index = saved.nodes.findIndex(candidate => candidate.id === node.id)
+    if (index < 0) {
+      saved.nodes.push(node)
+      for (const edge of current.edges) {
+        if ((edge.from === node.id || edge.to === node.id) && !saved.edges.some(candidate => candidate.id === edge.id)) {
+          saved.edges.push(edge)
+        }
+      }
+      continue
+    }
+    const incoming = saved.nodes[index]
+    // locked=false in the incoming doc is the agent's explicit unlock; let it through.
+    if (incoming.locked !== true) continue
+    const target = incoming as unknown as Record<string, unknown>
+    const source = node as unknown as Record<string, unknown>
+    for (const key of LOCKED_PRESERVED_KEYS) {
+      if (key in source) target[key] = source[key]
+      else delete target[key]
+    }
+  }
+}
+
 function sanitizeNode(input: Record<string, unknown>): CanvasNode {
   const kind = canvasNodeKind({ kind: input.kind, id: input.id })
   const numberOr = (value: unknown, fallback: number) => typeof value === 'number' && Number.isFinite(value) ? value : fallback
@@ -266,23 +306,22 @@ export class MontagexCanvasStore {
     } catch {
       // No previous document to back up.
     }
-    return this.write({ version: 1, updatedAt: 0, nodes: [], edges: [] })
+    return this.write({ version: 1, updatedAt: 0, nodes: [], edges: [] }, undefined, { preserveLocked: false })
   }
 
   /**
    * Persist a full document. When `expectedUpdatedAt` is provided and does not
    * match the stored revision, the write is refused with a conflict error so
-   * the caller can re-read and merge.
+   * the caller can re-read and merge. Locked nodes are preserved unless the
+   * caller opts out (reset / snapshot restore are explicit user actions).
    */
-  async write(doc: CanvasDocument, expectedUpdatedAt?: number): Promise<CanvasDocument> {
+  async write(doc: CanvasDocument, expectedUpdatedAt?: number, options: { preserveLocked?: boolean } = {}): Promise<CanvasDocument> {
     const dir = join(resolveOutputDir(this.outputDir))
     await mkdir(dir, { recursive: true })
     const path = this.filePath()
-    if (expectedUpdatedAt !== undefined) {
-      const current = await this.read()
-      if (current.updatedAt !== expectedUpdatedAt) {
-        throw Object.assign(new Error('canvas document changed since read; re-read and merge before saving'), { code: 'CANVAS_CONFLICT' })
-      }
+    const current = await this.read()
+    if (expectedUpdatedAt !== undefined && current.updatedAt !== expectedUpdatedAt) {
+      throw Object.assign(new Error('canvas document changed since read; re-read and merge before saving'), { code: 'CANVAS_CONFLICT' })
     }
     const saved: CanvasDocument = {
       version: 1,
@@ -291,6 +330,7 @@ export class MontagexCanvasStore {
       nodes: doc.nodes.map(node => sanitizeNode(node as unknown as Record<string, unknown>)),
       edges: doc.edges.map(edge => sanitizeEdge(edge as unknown as Record<string, unknown>)),
     }
+    if (options.preserveLocked !== false) preserveLockedNodes(saved, current)
     validateParents(saved)
     await writeFile(path, JSON.stringify(saved), 'utf8')
     return saved
@@ -629,7 +669,7 @@ export class MontagexCanvasStore {
     const parsed = JSON.parse(raw) as { nodes?: unknown[]; edges?: unknown[]; title?: unknown }
     const nodes = Array.isArray(parsed.nodes) ? parsed.nodes.map((input: unknown) => sanitizeNode(input as Record<string, unknown>)) : []
     const edges = Array.isArray(parsed.edges) ? parsed.edges.map((input: unknown) => sanitizeEdge(input as Record<string, unknown>)) : []
-    return this.write({ version: 1, updatedAt: Date.now(), ...(typeof parsed.title === 'string' ? { title: parsed.title } : {}), nodes, edges })
+    return this.write({ version: 1, updatedAt: Date.now(), ...(typeof parsed.title === 'string' ? { title: parsed.title } : {}), nodes, edges }, undefined, { preserveLocked: false })
   }
 
   /**
