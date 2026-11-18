@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 
 import { dx, dxChrome, dxGhostBtn, dxPill } from '../canvas-theme.ts'
 import { SHOT_STATUS_COLOR, SHOT_STATUS_LABEL, SHOT_STATUSES, asShotStatus, type ShotStatus } from './document.ts'
 import {
-  IconAlign, IconCheck, IconChevron, IconClose, IconCompare, IconCopy, IconDownload, IconEdit, IconFit,
+  IconAlign, IconBack, IconCheck, IconChevron, IconClose, IconCompare, IconCopy, IconDownload, IconEdit, IconFit,
   IconFolder, IconGrid, IconGroup, IconHelp, IconImage, IconLink, IconLock, IconMinus, IconPlus, IconRedo, IconScissors, IconSearch,
   IconSend, IconSpark, IconText, IconTrash, IconUndo, IconUnlink, IconUnlock, IconUpload, IconVideo, IconAudio, KindGlyph,
 } from './icons.tsx'
@@ -130,6 +130,7 @@ export function TopBar(props: {
   saveState: string
   count: number
   onClose?: () => void
+  onExitToChat?: () => void
 }): ReactNode {
   return (
     <div className="dx-topbar" style={{
@@ -174,6 +175,17 @@ export function TopBar(props: {
           <span style={{ opacity: .4 }}>·</span>
           {props.count} 镜
         </div>
+        {props.onExitToChat !== undefined ? (
+          <button
+            className="dx-hit"
+            style={{ ...dxGhostBtn, height: 32, padding: '0 12px', borderRadius: 999, display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}
+            onClick={props.onExitToChat}
+            title="返回经典对话（切回 Chat 视图）"
+          >
+            <IconBack size={13} />
+            返回对话
+          </button>
+        ) : null}
         {props.onClose !== undefined ? (
           <button className="dx-hit" style={{ ...dxGhostBtn, width: 32, height: 32, borderRadius: 999 }} onClick={props.onClose} title="关闭画布">
             <IconClose size={14} />

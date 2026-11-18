@@ -47,6 +47,8 @@ export interface StageProps {
   workspace?: WorkspaceClient
   onAskDsh?: (text: string, sessionId: string) => Promise<void>
   onClose?: () => void
+  /** Switch the conversation back to the classic chat view (top bar button). */
+  onExitToChat?: () => void
 }
 
 const EDGE_STYLE = { stroke: 'rgba(255,255,255,.62)', strokeWidth: 2 }
@@ -2373,6 +2375,7 @@ function StageInner(props: StageProps): ReactNode {
         saveState={saveState}
         count={nodes.length}
         onClose={props.onClose}
+        onExitToChat={props.onExitToChat}
       />
       <input
         ref={uploadRef}

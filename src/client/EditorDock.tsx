@@ -35,6 +35,8 @@ export interface EditorDockProps {
   liveSessions?: unknown
   /** alpha.1 `uiSession.pendingInteractions` face (question/approval carriers). */
   pending?: unknown
+  /** `conversation.view` owner prop: select another View of this Session. */
+  openView?: (view: string, focus: string) => void
   /** alpha.1 `workspaces` Client service: observable list + archived set. */
   workspaces?: {
     list?: { getSnapshot(): WorkspaceSnapshotLike }
@@ -113,6 +115,10 @@ export function EditorDock(props: EditorDockProps): ReactNode {
           pending={props.pending}
           workspace={workspace}
           onClose={closeEditor}
+          onExitToChat={props.openView === undefined ? undefined : () => {
+            closeEditor()
+            props.openView?.('chat', '')
+          }}
           onAskDsh={async (text, sessionId) => {
             const prompt = sessions?.prompt
             if (sessionId === undefined || sessionId === '' || prompt === undefined) {

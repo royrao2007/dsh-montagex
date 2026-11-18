@@ -113,6 +113,9 @@ export function IconFit(props: IconProps = {}): ReactNode {
 export function IconChevron(props: IconProps = {}): ReactNode {
   return <Svg {...props}><path d="m7 10 5 5 5-5" /></Svg>
 }
+export function IconBack(props: IconProps = {}): ReactNode {
+  return <Svg {...props}><path d="M14 5l-7 7 7 7" /></Svg>
+}
 export function IconFolder(props: IconProps = {}): ReactNode {
   return <Svg {...props}><path d="M3 7h5l2 2h11v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" /></Svg>
 }

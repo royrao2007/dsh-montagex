@@ -2,6 +2,20 @@
 
 本文件记录 dsh-montagex 的用户可见变更。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [0.2.8] - 2026-11-18
+
+### Added
+
+- **画布顶栏「返回对话」**：在 MontageX 画布全屏时一键切回经典 Chat 视图。按钮走 `conversation.view` 的 owner 属性 `openView('chat', …)`，不是只关掉覆盖层；老宿主没有 `openView` 时按钮不出现。
+
+### Changed
+
+- **适配 DeepSeek Harness 0.2.2-rc.5**：`engines.dsh` 提到 `>=0.2.2-rc.5 <0.3.0-0`，`@deepseek-ai/dsh-tools` 的 peer 与 dev 依赖提到 `^0.2.2-rc.5`，README 要求同步。已核对 rc.2 → rc.5 官方升级索引：仅「DeepSeek 拒答错误码」与「DeepSeek 模型 web search 默认」两项变化，本插件都不使用，工具、Slot、设置与 Remote 接口无破坏性变更。
+
+### Release
+
+- 发布 **GitHub Release v0.2.8** 与 npm `dsh-montagex@0.2.8`，版本号、本文与构建产物一致。
+
 ## [0.2.7] - 2026-11-18
 
 ### Fixed

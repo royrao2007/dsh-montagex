@@ -12,7 +12,7 @@ MontageX 是一个 `dsh-plugin`，跑在 DeepSeek Harness（DSH）里：把一�
 > ffmpeg editing, grading, subtitles, QC) plus **8 team-collaboration tools**. It ships
 > 359 knowledge articles, 196 skills and 15 recipes. Everything local (editing,
 > grading, subtitle burn-in, QC) runs on ffmpeg and costs no model tokens; only
-> confirmed generations spend money. Requires DSH `>=0.2.2-rc.1 <0.3.0-0` and
+> confirmed generations spend money. Requires DSH `>=0.2.2-rc.5 <0.3.0-0` and
 > Node.js ≥ 24.9.0.
 
 ---
@@ -157,7 +157,7 @@ pnpm 把包从临时目录改名成正式目录时被 Windows 拒绝。**原因�
 
 ## 要求
 
-- **DeepSeek Harness `>=0.2.2-rc.1 <0.3.0-0`**（`package.json` 的 `engines.dsh`，即 0.2.2-rc.1 及以上、0.3 以下）
+- **DeepSeek Harness `>=0.2.2-rc.5 <0.3.0-0`**（`package.json` 的 `engines.dsh`，即 0.2.2-rc.5 及以上、0.3 以下）
 - **Node.js ≥ 24.9.0**
 - 剪辑/质检需要本机 `ffmpeg`（缺失时工具会明确报错，不再静默失败）
 

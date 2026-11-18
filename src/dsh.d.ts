@@ -3,7 +3,7 @@
 // declarations keep `npm run typecheck` self-contained without depending on
 // private DSH workspace packages.
 //
-// Target: DeepSeek Harness 0.2.2-rc.2. Names that no longer exist there are
+// Target: DeepSeek Harness 0.2.2-rc.5. Names that no longer exist there are
 // recorded in the comments so a future reader does not reintroduce them:
 // `settings.register` (removed 0.2.0), `subagents.registerContinuableSetup`
 // (removed 0.1.5), the browser-side `settingsScope` service (removed 0.2.x).

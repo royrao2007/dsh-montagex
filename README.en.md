@@ -159,7 +159,7 @@ wired up by filling in a closed AdapterSpec, with no code changes.
 
 ## Requirements
 
-- **DeepSeek Harness `>=0.2.2-rc.1 <0.3.0-0`** (`engines.dsh` in `package.json`)
+- **DeepSeek Harness `>=0.2.2-rc.5 <0.3.0-0`** (`engines.dsh` in `package.json`)
 - **Node.js ≥ 24.9.0**
 - `ffmpeg` on this machine for editing and QC (when it is missing, tools fail
   loudly instead of silently producing nothing)
