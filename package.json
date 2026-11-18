@@ -1,6 +1,6 @@
 {
   "name": "dsh-montagex",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "MontageX: a full-pipeline AI video production harness for DeepSeek Harness — brief triage, shot planning, storyboard, image/video/audio generation, an infinite shot canvas, and local ffmpeg editing, grading, subtitles and QC, plus team collaboration. MontageX：面向 DeepSeek Harness 的导演全流程 AI 视频制作插件，覆盖需求分诊、镜头排期、分镜、图像/视频/音频生成、无限分镜画布、本地 ffmpeg 剪辑与确定性质检，并内置团队协作。",
   "type": "module",
   "main": "lib/index.js",
@@ -113,7 +113,7 @@
   },
   "engines": {
     "node": ">=24.9.0",
-    "dsh": ">=0.2.2-rc.1 <0.3.0-0"
+    "dsh": ">=0.2.2-rc.5 <0.3.0-0"
   },
   "license": "SEE LICENSE IN NOTICE",
   "dependencies": {
