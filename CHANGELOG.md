@@ -2,6 +2,16 @@
 
 本文件记录 dsh-montagex 的用户可见变更。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [0.2.9] - 2026-11-19
+
+### Fixed
+
+- **设置页取不到配置表单**：`configForms` 按 Loader 行 id 取表单，插件经 profile 的 `include` 树挂载时行 id 是 `include:montagex`，而客户端仍按 `montagex` 取，结果设置页只显示「Host 没有提供 settings 表单服务（configForms）」，Vision / Image / Video / Audio 的模型配置整块消失。现在按 `montagex` 与 `include:montagex` 依次解析，并支持从服务列表里按包名兜底匹配。
+
+### Release
+
+- 发布 **GitHub Release v0.2.9** 与 npm `dsh-montagex@0.2.9`。
+
 ## [0.2.8] - 2026-11-18
 
 ### Added

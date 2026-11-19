@@ -51,6 +51,14 @@ export const inject = [
 /** Settings namespace: the Loader row id, which is also the entry `configForms` keys on. */
 export const SETTINGS_NAMESPACE = 'montagex'
 
+/**
+ * Loader row ids this package can appear under. A bundle mounted through the
+ * profile's `include` tree is addressed as `include:montagex`; a direct row is
+ * plain `montagex`. `configForms` keys on whichever id the Host actually used,
+ * so read the first form that resolves instead of assuming one topology.
+ */
+const SETTINGS_NAMESPACE_CANDIDATES = ['montagex', 'include:montagex'] as const
+
 /** The `ctx.configForms` face this plugin uses (DSH 0.2.x settings domain). */
 interface ConfigFormSnapshot {
   status: 'loading' | 'ready' | 'unavailable'
@@ -80,6 +88,50 @@ interface ConfigFormsFace {
   get<T>(entryId: string): ConfigFormFace
 }
 
+/**
+ * Pick the Host entry whose form backs this settings page.
+ *
+ * `configForms.get()` is keyed by the Loader row id, which depends on how the
+ * profile mounted the bundle (`montagex` for a direct row, `include:montagex`
+ * inside the include tree). Try the known ids first, then fall back to a
+ * listing when the service exposes one, so a renamed row still resolves.
+ */
+export function resolveSettingsForm(forms: ConfigFormsFace | undefined): ConfigFormFace | undefined {
+  if (forms === undefined) return undefined
+  for (const id of SETTINGS_NAMESPACE_CANDIDATES) {
+    try {
+      const form = forms.get<Record<string, unknown>>(id)
+      if (form !== undefined && form !== null) return form
+    } catch {
+      // A rejected id is expected while probing; keep trying.
+    }
+  }
+  const listing = forms as unknown as { list?: () => unknown; entries?: unknown }
+  let rows: unknown
+  try {
+    rows = typeof listing.list === 'function' ? listing.list() : listing.entries
+  } catch {
+    rows = undefined
+  }
+  if (Array.isArray(rows)) {
+    for (const row of rows) {
+      if (row === null || typeof row !== 'object') continue
+      const record = row as Record<string, unknown>
+      const id = typeof record.id === 'string' ? record.id : typeof record.entryId === 'string' ? record.entryId : ''
+      const name = typeof record.name === 'string' ? record.name : ''
+      if (id === '') continue
+      if (name !== 'dsh-montagex' && !id.endsWith(':montagex') && id !== 'montagex') continue
+      try {
+        const form = forms.get<Record<string, unknown>>(id)
+        if (form !== undefined && form !== null) return form
+      } catch {
+        // Keep scanning.
+      }
+    }
+  }
+  return undefined
+}
+
 function optionalService(ctx: ClientContext, name: string): unknown {
   try {
     const rec = ctx as unknown as Record<string, unknown>
@@ -106,7 +158,7 @@ export function apply(ctx: ClientContext): void {
    */
   const settingsCard = () => {
     const forms = optionalService(ctx, 'configForms') as ConfigFormsFace | undefined
-    const form = forms?.get<Record<string, unknown>>(SETTINGS_NAMESPACE)
+    const form = resolveSettingsForm(forms)
     return ctx.slots.register({
       name: 'settings.section',
       id: 'montagex',
