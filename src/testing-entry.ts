@@ -1,4 +1,5 @@
 export { MONT_RUNTIME_PRESET } from './runtime-preset.ts'
+export { resolveSettingsForm, SETTINGS_NAMESPACE, SETTINGS_NAMESPACE_CANDIDATES } from './client/settings-form.ts'
 export { corpus } from './corpus.ts'
 export {
   extractCitedSources, extractDescription, extractMentionedIds, inferOkfTags, inferOkfType,

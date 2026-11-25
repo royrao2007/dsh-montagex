@@ -2,6 +2,21 @@
 
 本文件记录 dsh-montagex 的用户可见变更。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [0.2.10] - 2026-11-25
+
+### Added
+
+- **项目文档区 `fixlog/`**：`ARCHITECTURE.md`（分层、模块边界、依赖图、调用方向、数据流、外部依赖、功能索引表）、`API.md`（HTTP 路由、`/montagex` 命令、162 个工具的参数与注册位置、错误码分段、状态文件契约、无此类接口声明）、`缺陷修复记录.md`（唯一修复台账）。另新增根目录 `AGENTS.md`，文首放开工必读指引、末尾放「文档即地图」五条铁律。
+- **设置表单解析抽出并加回归测试**：`src/client/settings-form.ts` 提供纯函数 `resolveSettingsForm()`，`tests/settings-form.test.mjs` 覆盖直接行 id、`include:montagex` 行 id、探测抛错不中断、列表兜底、无表单返回 `undefined` 五种情形。
+
+### Changed
+
+- 设置页的类型与解析逻辑从 `src/client/index.ts` 移到 `settings-form.ts`，`index.ts` 只做装配与再导出，行为不变。
+
+### Release
+
+- 发布 **GitHub Release v0.2.10** 与 npm `dsh-montagex@0.2.10`。
+
 ## [0.2.9] - 2026-11-19
 
 ### Fixed
