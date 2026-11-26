@@ -6,6 +6,7 @@
  */
 
 import { buildIpBrief, ipIssueLine, scanIpRisk, type IpHit, type IpRewriteBrief } from '../ip-lexicon.ts'
+import { estimateCost, type CostEstimate, type ModelPrice } from './cost-estimate.ts'
 
 export interface PreflightInput {
   prompt: string
@@ -17,6 +18,12 @@ export interface PreflightInput {
   negative?: string
   userConfirmedBudget?: boolean
   userConfirmedContent?: boolean
+  /**
+   * Explicit price rows (e.g. from `<outputDir>/model-price.json`). The plugin
+   * ships no rates of its own: without a matching row the cost gate reports
+   * "unknown" instead of inventing a number.
+   */
+  prices?: ModelPrice[]
 }
 
 export interface GateResult {
@@ -29,6 +36,8 @@ export interface PreflightOutput {
   gates: { spec: GateResult; content: GateResult; cost: GateResult; rights: GateResult }
   verdict: 'pass' | 'review'
   summary: string
+  /** Deterministic money estimate for the cost gate; never a guessed rate. */
+  cost: CostEstimate
   ip?: { hits: IpHit[]; dirty: boolean; brief: IpRewriteBrief; negatives: string[]; negativeLine: string }
 }
 
@@ -87,7 +96,19 @@ export function preflight(input: PreflightInput): PreflightOutput {
 
   // 成本
   const count = input.count ?? 1
-  gates.cost.issues.push(`预计生成 ${count} 次；本插件无模型价目表——需与用户确认预算上限与失败重试策略（先 mock/低档验证构图，再付费）`)
+  const estimate: CostEstimate = estimateCost({
+    prices: input.prices ?? [],
+    ...(input.model !== undefined ? { model: input.model } : {}),
+    ...(input.type !== undefined ? { type: input.type } : {}),
+    ...(input.duration !== undefined ? { duration: input.duration } : {}),
+    count,
+  })
+  gates.cost.notes.push(estimate.breakdown)
+  if (estimate.estimatedCost === null) {
+    gates.cost.issues.push(`预计生成 ${count} 次；无法估算金额——需与用户确认预算上限与失败重试策略（先 mock/低档验证构图，再付费）`)
+  } else {
+    gates.cost.notes.push(`预计花费 ${estimate.estimatedCost.toFixed(2)} ${estimate.currency ?? ''}`.trim())
+  }
   if (input.userConfirmedBudget === true) {
     gates.cost.issues.length = 0
     gates.cost.notes.push('预算已经用户确认')
@@ -109,6 +130,7 @@ export function preflight(input: PreflightInput): PreflightOutput {
   return {
     gates,
     verdict: pass ? 'pass' : 'review',
+    cost: estimate,
     summary: pass
       ? '四道闸门通过，可提交生成。'
       : '存在待办闸门：先修复 issues（或与用户确认），按 montagex-playbook 先占位后生成。',

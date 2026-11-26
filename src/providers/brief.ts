@@ -51,6 +51,12 @@ export interface BriefOutput {
 }
 
 const TYPE_RULES: Array<{ type: string; keywords: string[]; seconds: number }> = [
+  // Newer commercial shapes rank before the broad '口播/讲解' catch-all so
+  // "数字人口播" lands on the avatar recipe instead of the tutorial one.
+  { type: '数字人/口播人像', keywords: ['数字人', '虚拟主播', 'AI主播', '口播人像', '真人讲解'], seconds: 60 },
+  { type: '译制/配音翻译', keywords: ['译制', '翻译配音', '外语配音', '中配', '英配', '本地化'], seconds: 120 },
+  { type: '播客/访谈改造', keywords: ['播客', 'podcast', 'Podcast', '访谈切片', '音频改造'], seconds: 60 },
+  { type: '屏幕演示/录屏', keywords: ['录屏', '屏幕演示', '操作演示', '软件演示', 'screencast'], seconds: 90 },
   { type: '口播/讲解', keywords: ['介绍', '讲解', '口播', '教程', '科普', '测评', '分享'], seconds: 45 },
   { type: '预告/片花', keywords: ['预告片', '电影预告', '片花', 'trailer', '预告'], seconds: 40 },
   { type: '广告/宣传', keywords: ['广告', '产品', '带货', '宣传', '推广', '促销', '宣传片', '品牌'], seconds: 75 },

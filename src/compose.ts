@@ -1,4 +1,4 @@
-export type ComposeKind = 'promo' | 'literary' | 'remake' | 'narrative' | 'talk' | 'montage' | 'trailer'
+export type ComposeKind = 'promo' | 'literary' | 'remake' | 'narrative' | 'talk' | 'montage' | 'trailer' | 'spoken-avatar' | 'dub' | 'podcast' | 'screen-demo'
 
 export type ComposePhase = 'plan' | 'create' | 'refine'
 
@@ -27,6 +27,10 @@ const RECIPES: Record<ComposeKind, { file: string; name: string }> = {
   talk: { file: 'recipes/tutorial-video.md', name: '教程/口播' },
   montage: { file: 'recipes/clip-recut.md', name: '混剪' },
   trailer: { file: 'recipes/trailer.md', name: '预告片' },
+  'spoken-avatar': { file: 'recipes/spoken-avatar.md', name: '数字人口播' },
+  dub: { file: 'recipes/localization-dub.md', name: '译制配音' },
+  podcast: { file: 'recipes/podcast-repurpose.md', name: '播客改造' },
+  'screen-demo': { file: 'recipes/screen-demo.md', name: '屏幕演示' },
 }
 
 export function composeKindFromBriefType(type: string): ComposeKind {
@@ -36,6 +40,10 @@ export function composeKindFromBriefType(type: string): ComposeKind {
   if (type === '口播/讲解') return 'talk'
   if (type === '混剪/卡点') return 'montage'
   if (type === '预告/片花') return 'trailer'
+  if (type === '数字人/口播人像') return 'spoken-avatar'
+  if (type === '译制/配音翻译') return 'dub'
+  if (type === '播客/访谈改造') return 'podcast'
+  if (type === '屏幕演示/录屏') return 'screen-demo'
   return 'narrative'
 }
 
@@ -169,6 +177,73 @@ function stagesFor(kind: ComposeKind, hasMaterials: boolean): ComposeStage[] {
       commonSignoff(),
     ]
   }
+  if (kind === 'spoken-avatar') {
+    return [
+      inventory,
+      routeStage(),
+      { ...research, purpose: '数字人口播的商用基准：正脸固定机位、口型清晰、字幕安全区、平台竖版规格' },
+      { ...ask, purpose: '一次问清口播稿（或先写稿）、人像来源（真人拍摄 / 生成形象）、画幅、语言与时长' },
+      { name: '稿', purpose: '口播稿按语速折算预算，切句落点作为字幕与画面切换锚', tools: ['mont_speech_duration', 'mont_terms_set'], phase: 'create' },
+      { name: '锚', purpose: '形象锚：有真人素材先做角色设定表；生成形象必须先落设定图再生成口播镜头', tools: ['mont_character_register', 'mont_series'], phase: 'create' },
+      craftStage(),
+      { name: '声', purpose: '先出配音（确定性时间轴），再让口型/镜头对齐语音区间', tools: ['mont_generate_audio', 'mont_audio_sync'], phase: 'create' },
+      commonSignoff(),
+    ]
+  }
+  if (kind === 'dub') {
+    return [
+      inventory,
+      routeStage(),
+      { ...research, purpose: '译制基准：原声分离、字幕与配音对齐、语气本地化而不是逐字直译' },
+      {
+        name: '析',
+        purpose: hasMaterials ? '拆源片：分镜与语音区间，拿时间轴当译文落点' : '无源片时先向用户要原片；译制不能凭稿生成',
+        tools: hasMaterials ? ['mont_video_analyze', 'mont_transcribe_audio'] : ['mont_ask'],
+        phase: 'plan',
+      },
+      { ...ask, purpose: '一次问清目标语言、配音风格、是否保留原声底噪、字幕是否烧入' },
+      { name: '译', purpose: '按字/秒折算每条字幕，超窗先缩句再配音', tools: ['mont_terms_set', 'mont_speech_duration', 'mont_srt_lint'], phase: 'create' },
+      { name: '声', purpose: '分轨生成译文配音，按语音区间对齐，不整条硬铺', tools: ['mont_generate_audio', 'mont_audio_sync'], phase: 'create' },
+      { name: '配', purpose: '字幕走 subtitle_format + video_subtitle；混音走 audio_mix 压原声', tools: ['mont_subtitle_format', 'mont_video_subtitle', 'mont_audio_mix'], phase: 'refine' },
+      commonSignoff(),
+    ]
+  }
+  if (kind === 'podcast') {
+    return [
+      inventory,
+      routeStage(),
+      { ...research, purpose: '播客改造基准：长音频切成短视频，靠一句钩子 + 一个观点切片' },
+      {
+        name: '析',
+        purpose: '转写长音频 → 按语义切候选片段，先排名再挑',
+        tools: ['mont_transcribe_audio', 'mont_clip_rank'],
+        phase: 'plan',
+      },
+      { ...ask, purpose: '一次问清出几条片、单条时长、是否加字幕/波形动画、平台画幅' },
+      { name: '选', purpose: '从候选里定 N 条，每条一句钩子 + 一句话观点，写成字幕稿', tools: ['mont_srt_lint', 'mont_speech_duration'], phase: 'create' },
+      { name: '剪', purpose: '按字幕时间窗确定性切段，不生成新画面', tools: ['mont_subtitle_cut', 'mont_video_process'], phase: 'create' },
+      { name: '包', purpose: '字幕烧入 + 封面 + 多条交付', tools: ['mont_video_subtitle', 'mont_media_package'], phase: 'refine' },
+      commonSignoff(),
+    ]
+  }
+  if (kind === 'screen-demo') {
+    return [
+      inventory,
+      routeStage(),
+      { ...research, purpose: '录屏演示基准：可读性优先（字号/缩放/光标引导），节奏比镜头语言重要' },
+      {
+        name: '析',
+        purpose: hasMaterials ? '拆录屏：按操作步骤切段，标出关键点击时刻' : '无录屏时先确认是否重录，不用生成画面假装演示',
+        tools: hasMaterials ? ['mont_video_analyze', 'mont_extract_frames'] : ['mont_ask'],
+        phase: 'plan',
+      },
+      { ...ask, purpose: '一次问清步骤清单、是否配音讲解、画幅（横屏教程 / 竖屏短视频）、是否加放大镜效果' },
+      { name: '案', purpose: '每步一镜：步骤标题 + 操作画面 + 讲解要点；标题落在安全区', tools: ['mont_storyboard'], phase: 'create' },
+      { name: '剪', purpose: '按步骤切段、去掉空白等待、关键点击处可 zoom', tools: ['mont_video_process', 'mont_video_zoom'], phase: 'create' },
+      { name: '包', purpose: '字幕 + 封面 + 交付；步骤标题可作为烧入字幕', tools: ['mont_video_subtitle', 'mont_media_package'], phase: 'refine' },
+      commonSignoff(),
+    ]
+  }
   return [
     inventory,
     routeStage(),
@@ -217,5 +292,9 @@ function researchFor(kind: ComposeKind, request: string): string[] {
   if (kind === 'talk') return ['口播 语速', '讲解 字幕节奏']
   if (kind === 'montage') return ['卡点 节拍', '混剪 素材盘点']
   if (kind === 'trailer') return ['预告片 钩子 硬切', '日漫 热血 冲击帧']
+  if (kind === 'spoken-avatar') return [`${topic} 口播稿结构`, '数字人 口型 机位', '竖版短视频 字幕安全区']
+  if (kind === 'dub') return [`${topic} 目标语言 语气`, '译制配音 对齐', '字幕 每秒字数']
+  if (kind === 'podcast') return [`${topic} 播客切片`, '金句 钩子 前3秒', '长音频 转写 切段']
+  if (kind === 'screen-demo') return [`${topic} 录屏演示 结构`, '教程 步骤 标题', '可读性 字号 缩放']
   return ['分镜 连续性', '叙事 节奏']
 }

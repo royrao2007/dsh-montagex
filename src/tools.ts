@@ -1,5 +1,6 @@
 import { MONT_RUNTIME_PRESET } from './runtime-preset.ts'
 import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import type { Context } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-tools'
 import type {} from '@deepseek-ai/dsh-skill'
@@ -33,6 +34,8 @@ import { runVideo } from './providers/video.ts'
 import { runVision } from './providers/vision.ts'
 import { audioBeats, audioMix, videoConcat, videoPip, videoProcess, videoSubtitle, videoZoom } from './providers/video-process.ts'
 import { preflight } from './providers/preflight.ts'
+import { parsePriceTable, type ModelPrice } from './providers/cost-estimate.ts'
+import { allPlatformSpecs, platformSpec } from './providers/platform-spec.ts'
 import { planStoryboard, validateMvStoryboard } from './providers/storyboard.ts'
 import { qaCheck, videoAnalyze } from './providers/video-analyze.ts'
 import { brief } from './providers/brief.ts'
@@ -790,19 +793,33 @@ export function syncTools(ctx: Context, settings: MontagexSettings, applyCapabil
 
   disposers.push(ctx.tools.register(safeDefine({
     name: 'mont_media_package',
-    description: '一键交付打包：把成片裁成预告片并提取封面图，返回可下载的成片、预告和封面素材。标题写作约束继续用 mont_creative_suite 的 copy-harness。',
+    description: '一键交付打包：把成片裁成预告片并提取封面图，返回可下载的成片、预告和封面素材。给 platform 时按该平台规格出规格化副本（尺寸/安全区/时长上限）。标题写作约束继续用 mont_creative_suite 的 copy-harness。',
     parameters: {
       input: { type: 'string', required: true, description: 'Finished video path.' },
       trailerSeconds: { type: 'number', description: '预告长度，默认 15 秒，范围 3-60。' },
-      platform: { type: 'string', enum: ['douyin', 'kuaishou', 'wechat', 'bilibili', 'xiaohongshu'], description: '分发平台，仅用于结果说明。' },
+      platform: { type: 'string', enum: ['douyin', 'kuaishou', 'wechat', 'bilibili', 'xiaohongshu'], description: '分发平台；给出时同时输出该平台的规格化副本。' },
+      specs: { type: 'boolean', description: '为 true 时列出全部平台规格（不处理视频）。' },
     },
     output: objectOutput(),
     timeoutMs: 300_000,
     async execute(args: any) {
+      if (args.specs === true) return { specs: allPlatformSpecs() }
       const seconds = Math.min(60, Math.max(3, Number(args.trailerSeconds ?? 15)))
       const trailer = (await videoProcess({ outputDir: settings.outputDir, source: String(args.input), start: 0, end: seconds })).path
       const cover = (await extractFrames(String(args.input), settings.outputDir, { count: 1 }))[0]
-      return { input: String(args.input), trailer, cover, platform: args.platform, titleGuidance: { tool: 'mont_creative_suite', action: 'copy-harness', kind: 'commercial' } }
+      const target = platformSpec(typeof args.platform === 'string' ? args.platform : undefined)
+      // Platform copy: deterministic scale, never a regenerate.
+      const specFile = target === undefined
+        ? undefined
+        : (await videoProcess({ outputDir: settings.outputDir, source: String(args.input), scale: target.size })).path
+      return {
+        input: String(args.input),
+        trailer,
+        cover,
+        ...(target !== undefined ? { spec: { ...target, path: specFile } } : {}),
+        platform: args.platform,
+        titleGuidance: { tool: 'mont_creative_suite', action: 'copy-harness', kind: 'commercial' },
+      }
     },
   })))
 
@@ -2182,7 +2199,16 @@ export function syncTools(ctx: Context, settings: MontagexSettings, applyCapabil
     output: objectOutput(),
     timeoutMs: 30_000,
     async execute(args: any) {
-      return preflight(args)
+      // Explicit price rows only: `<outputDir>/model-price.json` when present.
+      // No table means the cost gate reports "unknown" instead of guessing.
+      const tablePath = join(resolveOutputDir(settings.outputDir), 'model-price.json')
+      let prices: ModelPrice[] = []
+      try {
+        prices = parsePriceTable(JSON.parse(readFileSync(tablePath, 'utf8')))
+      } catch {
+        prices = []
+      }
+      return preflight({ ...args, prices })
     },
   })))
 

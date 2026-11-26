@@ -45,6 +45,8 @@ export { clampH3Duration, clipH3Prompt, h3Resolution, h3SkipReferences, isH3Mode
 export { inferH3PromptMode, normalizeH3Prompt, h3CraftLooksReady } from './h3-prompt.ts'
 export { cropToAspect, ensureAspectFrame, extractTailFrame, fitScaleFilter, parseAspectRatio, zoomEndFrame } from './providers/frame-fit.ts'
 export { preflight } from './providers/preflight.ts'
+export { estimateCost, findPrice, parsePriceTable, roundCents } from './providers/cost-estimate.ts'
+export { PLATFORM_SPECS, allPlatformSpecs, detectPlatform, platformSpec } from './providers/platform-spec.ts'
 export {
   askDshRewriteText, buildIpBrief, collectNegatives, keepSpans, mergeNegativeLine, scanIpRisk,
 } from './ip-lexicon.ts'

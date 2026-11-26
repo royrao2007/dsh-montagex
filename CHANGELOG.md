@@ -2,6 +2,23 @@
 
 本文件记录 dsh-montagex 的用户可见变更。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [0.2.12] - 2026-11-27
+
+### Added
+
+- **成本估算（确定性计价表）**：`mont_preflight` 的成本闸门不再只会说"请确认预算"。新增 `src/providers/cost-estimate.ts`，按 `<outputDir>/model-price.json` 的显式价目（`model` / `price` / `unit` / `currency`）计算预估金额，支持按次、按秒、按张三种计价，四舍五入到分。**插件不内置任何价目**：模型不在表内时如实报"无法估算"，不编数字。
+- **四条成品形态配方**：`recipes/spoken-avatar.md`（数字人口播）、`recipes/localization-dub.md`（译制配音）、`recipes/podcast-repurpose.md`（播客改造）、`recipes/screen-demo.md`（屏幕演示）。`mont_brief` 分诊新增四种类型，`compose` 为它们各有一条阶段序列（稿/锚/声/镜、析/问/译/声/配、析/选/问/稿/剪/包、析/问/案/剪/声/包）。
+- **平台规格交付包**：`mont_media_package` 新增 `platform` 与 `specs`。给出 `platform` 时按该平台规格（抖音/快手 1080×1920、视频号 1080×1260、小红书 1080×1440、B站 1920×1080）用确定性缩放产出规格化副本，并返回安全区与时长上限；`specs: true` 只列规格不动视频。
+
+### Changed
+
+- `mont_preflight` 返回值新增 `cost` 字段（`known` / `estimatedCost` / `currency` / `breakdown`），成本闸门通过与否仍只看用户是否确认预算。
+- 分诊顺序调整：四条新商用形态排在「口播/讲解」这一宽泛兜底之前，避免"数字人口播"被归到教程配方。
+
+### Release
+
+- 发布 **GitHub Release v0.2.12** 与 npm `dsh-montagex@0.2.12`。
+
 ## [0.2.11] - 2026-11-26
 
 ### Changed
