@@ -2,6 +2,19 @@
 
 本文件记录 dsh-montagex 的用户可见变更。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [0.2.11] - 2026-11-26
+
+### Changed
+
+- **兼容 DSH `0.2.3-alpha.2`**：按官方升级索引核对 `0.2.2-rc.5 → 0.2.3-alpha.1` 的全部条目，插件不命中任何破坏性变更（未使用 `ctx.sessionQuery.inspectSession`、未在浏览器侧消费 `systemMessages`、未调用 `list_agents`、未依赖内置 office 技能或“个性化推荐”bundle），`systemPrompt.section()` 仍是当前契约。
+- **Node 版本门禁跟上官方要求**：`engines.node` 由 `>=24.9.0` 改为 `^24.22.3 || >=26.13.1`（DSH 0.2.3-alpha.1 起的最低 Node，含 2026 年 11 月 undici 安全修复）；CI 的 Node 固定版本同步到 `24.22.3`。
+- **schemastery 兼容 alpha 线**：peer 放宽为 `^3.19.0 || ~3.20.0-alpha.1`，dev 依赖升到 `3.20.0-alpha.1` 并在其下跑通全量测试。
+- `engines.dsh` 保持 `>=0.2.2-rc.5 <0.3.0-0`：同一份产物同时服务当前 `0.2.2-rc.5` 与新的 `0.2.3-alpha.2`。
+
+### Release
+
+- 发布 **GitHub Release v0.2.11** 与 npm `dsh-montagex@0.2.11`。
+
 ## [0.2.10] - 2026-11-25
 
 ### Added

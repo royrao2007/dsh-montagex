@@ -2,12 +2,12 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 
-test('CI workflow pins node 22.19, npm ci, npm test, and lib/ sync', () => {
+test('CI workflow pins node 24.22.3, npm ci, npm test, and lib/ sync', () => {
   const text = readFileSync(new URL('../.github/workflows/test.yml', import.meta.url), 'utf8')
   assert.doesNotMatch(text, /^\t/m, 'workflow must be space-indented YAML')
   assert.match(text, /^name:\s*test\s*$/m)
   assert.match(text, /ubuntu-latest/)
-  assert.match(text, /node-version:\s*'22\.19'/)
+  assert.match(text, /node-version:\s*'24\.22\.3'/)
   assert.match(text, /npm ci/)
   assert.match(text, /npm test/)
   assert.match(text, /git diff --ignore-cr-at-eol --quiet lib\//)
@@ -21,9 +21,10 @@ test('release workflow publishes a GitHub Release on v* tags', () => {
   assert.match(text, /^name:\s*release\s*$/m)
   assert.match(text, /tags:/)
   assert.match(text, /v\*/)
-  assert.match(text, /node-version:\s*'22\.19'/)
+  assert.match(text, /node-version:\s*'24\.22\.3'/)
   assert.match(text, /npm test/)
   assert.match(text, /apt-get install -y ffmpeg/)
   assert.match(text, /gh release create/)
   assert.match(text, /scripts\/release-notes\.mjs/)
 })
+
